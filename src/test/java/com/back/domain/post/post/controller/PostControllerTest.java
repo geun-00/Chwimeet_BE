@@ -110,7 +110,6 @@ class PostControllerTest {
         BDDMockito.given(postService.getPostList())
                 .willReturn(RsData.<List<PostListResBody>>success("게시글 목록 조회 성공", mockList));
 
-
         // when & then
         mockMvc.perform(get("/api/v1/posts")
                         .contentType(MediaType.APPLICATION_JSON))
