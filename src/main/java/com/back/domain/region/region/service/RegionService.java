@@ -7,6 +7,7 @@ import com.back.domain.region.region.entity.Region;
 import com.back.domain.region.region.repository.RegionRepository;
 import com.back.global.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -63,5 +64,14 @@ public class RegionService {
 
         region.setName(regionUpdateReqBody.name());
         return RegionResBody.of(region);
+    }
+
+    public void deleteRegion(Long regionId) {
+        try {
+            regionRepository.deleteById(regionId);
+            regionRepository.flush();
+        } catch (DataIntegrityViolationException e) { // DB FK 제약 조건 위반 시 발생에러, 데이터 베이스에 FK 설정 필요 (PostRegion 테이블)
+            throw new ServiceException("400-1", "%d번 지역을 참조 중인 게시글이 있습니다.".formatted(regionId));
+        }
     }
 }

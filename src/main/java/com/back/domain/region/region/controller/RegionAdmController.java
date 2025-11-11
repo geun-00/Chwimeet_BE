@@ -29,4 +29,10 @@ public class RegionAdmController {
         RegionResBody regionResBody = regionService.updateRegion(regionId, regionUpdateReqBody);
         return ResponseEntity.ok(regionResBody);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteRegion(@PathVariable("id") Long regionId) {
+        regionService.deleteRegion(regionId);
+        return ResponseEntity.ok().build();
+    }
 }
