@@ -1,10 +1,10 @@
 package com.back.domain.post.post.controller;
 
-import com.back.domain.post.post.dto.PostCreateReqBody;
-import com.back.domain.post.post.dto.PostDetailResBody;
-import com.back.domain.post.post.dto.PostListResBody;
+import com.back.domain.post.post.dto.req.PostCreateReqBody;
+import com.back.domain.post.post.dto.res.PostCreateResBody;
+import com.back.domain.post.post.dto.res.PostDetailResBody;
+import com.back.domain.post.post.dto.res.PostListResBody;
 import com.back.domain.post.post.service.PostService;
-import com.back.global.rsData.RsData;
 import com.back.global.security.SecurityUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,17 +22,19 @@ public class PostController {
 
     private final PostService postService;
 
-    // 추후 RsData<PostDto>로 변경 예정
     @PostMapping
-    public ResponseEntity<RsData<Long>> createPost(
+    public ResponseEntity<PostCreateResBody> createPost(
             @Valid @RequestBody PostCreateReqBody reqBody,
-            @AuthenticationPrincipal SecurityUser securityUser
+            @AuthenticationPrincipal SecurityUser user
     ) {
+        Long postId = postService.createPost(reqBody, user.getId());
 
-        Long memberId = securityUser.getId();
+        PostCreateResBody response = PostCreateResBody.builder()
+                .message("게시글이 등록되었습니다.")
+                .postId(postId)
+                .build();
 
-        RsData<Long> body = postService.createPost(reqBody, memberId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(body);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping

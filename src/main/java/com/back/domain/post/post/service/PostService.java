@@ -3,13 +3,16 @@ package com.back.domain.post.post.service;
 import com.back.domain.member.member.dto.AuthorDto;
 import com.back.domain.member.member.entity.Member;
 import com.back.domain.member.member.repository.MemberRepository;
-import com.back.domain.post.post.dto.*;
+import com.back.domain.post.post.dto.req.PostCreateReqBody;
+import com.back.domain.post.post.dto.res.PostDetailResBody;
+import com.back.domain.post.post.dto.res.PostImageResBody;
+import com.back.domain.post.post.dto.res.PostListResBody;
+import com.back.domain.post.post.dto.res.PostOptionResBody;
 import com.back.domain.post.post.entity.Post;
 import com.back.domain.post.post.entity.PostImage;
 import com.back.domain.post.post.entity.PostOption;
 import com.back.domain.post.post.repository.PostRepository;
 import com.back.global.exception.ServiceException;
-import com.back.global.rsData.RsData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +30,7 @@ public class PostService {
     // private final RegionRepository regionRepository;
     // private final CategoryRepository categoryRepository;
 
-    public RsData<Long> createPost(PostCreateReqBody reqBody, Long memberId) {
+    public Long createPost(PostCreateReqBody reqBody, Long memberId) {
 
         Member author = memberRepository.findById(memberId).orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 회원입니다."));
 
@@ -65,9 +68,8 @@ public class PostService {
                     .toList();
             post.getImages().addAll(postImages);
         }
-        postRepository.save(post);
-
-        return RsData.success("게시글이 등록되었습니다.");
+        Post savedPost = postRepository.save(post);
+        return savedPost.getId();
     }
 
     public List<PostListResBody> getPostList() {

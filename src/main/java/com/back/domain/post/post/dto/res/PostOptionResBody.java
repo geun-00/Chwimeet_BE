@@ -1,4 +1,4 @@
-package com.back.domain.post.post.dto;
+package com.back.domain.post.post.dto.res;
 
 import lombok.Builder;
 

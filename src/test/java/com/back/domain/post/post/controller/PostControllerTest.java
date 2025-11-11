@@ -3,9 +3,14 @@ package com.back.domain.post.post.controller;
 import com.back.domain.member.member.dto.AuthorDto;
 import com.back.domain.post.post.common.ReceiveMethod;
 import com.back.domain.post.post.common.ReturnMethod;
-import com.back.domain.post.post.dto.*;
+import com.back.domain.post.post.dto.req.PostCreateReqBody;
+import com.back.domain.post.post.dto.req.PostImageReqBody;
+import com.back.domain.post.post.dto.req.PostOptionReqBody;
+import com.back.domain.post.post.dto.res.PostDetailResBody;
+import com.back.domain.post.post.dto.res.PostImageResBody;
+import com.back.domain.post.post.dto.res.PostListResBody;
+import com.back.domain.post.post.dto.res.PostOptionResBody;
 import com.back.domain.post.post.service.PostService;
-import com.back.global.rsData.RsData;
 import com.back.global.security.SecurityUser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -58,7 +63,7 @@ class PostControllerTest {
         );
 
         BDDMockito.given(postService.createPost(any(), anyLong()))
-                .willReturn(RsData.success("게시글이 등록되었습니다.", 1L));
+                .willReturn(1L);
     }
 
     @Test
@@ -88,8 +93,8 @@ class PostControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(reqBody)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.resultCode").value("200-1"))
-                .andExpect(jsonPath("$.msg").value("게시글이 등록되었습니다."));
+                .andExpect(jsonPath("$.message").value("게시글이 등록되었습니다."))
+                .andExpect(jsonPath("$.postId").value(1));
     }
 
     @Test

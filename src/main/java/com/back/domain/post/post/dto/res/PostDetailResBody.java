@@ -1,4 +1,4 @@
-package com.back.domain.post.post.dto;
+package com.back.domain.post.post.dto.res;
 
 import com.back.domain.member.member.dto.AuthorDto;
 import com.back.domain.post.post.common.ReceiveMethod;
