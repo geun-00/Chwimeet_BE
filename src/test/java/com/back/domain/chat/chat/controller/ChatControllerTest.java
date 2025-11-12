@@ -167,9 +167,31 @@ class ChatControllerTest {
     }
 
     @Test
+    @WithUserDetails(value = "user2@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @DisplayName("본인과 채팅방 생성 시도 - 예외 발생")
+    void test4_createChatRoom_withSelf_shouldThrow() throws Exception {
+        // given
+        Long postId = post.getId();
+
+        CreateChatRoomReqBody reqBody = new CreateChatRoomReqBody(postId);
+
+        // when
+        ResultActions resultActions = mvc.perform(post("/api/v1/chats")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(reqBody)))
+                .andDo(print());
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.resultCode").value("400-1"))
+                .andExpect(jsonPath("$.msg").value("본인과 채팅방을 만들 수 없습니다."));
+    }
+
+    @Test
     @WithUserDetails(value = "user1@test.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @DisplayName("내 채팅방 목록 조회 - 값 검증")
-    void test4_getMyChatRooms_exactValues() throws Exception {
+    void test5_getMyChatRooms_exactValues() throws Exception {
         // given
         Member user1 = memberRepository.findByEmail("user1@test.com").get();
         Member user2 = memberRepository.findByEmail("user2@test.com").get();

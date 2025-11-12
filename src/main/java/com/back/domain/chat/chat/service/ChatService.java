@@ -33,6 +33,10 @@ public class ChatService {
         Member host = post.getAuthor();
         Member guest = memberService.getById(memberId);
 
+        if(host.getId().equals(guest.getId())) {
+            throw new ServiceException("400-1", "본인과 채팅방을 만들 수 없습니다.");
+        }
+
         Optional<ChatRoom> existingRoom = chatRoomRepository.findByPostAndMembers(postId, host.getId(), guest.getId());
         if (existingRoom.isPresent()) {
             ChatRoom room = existingRoom.get();
