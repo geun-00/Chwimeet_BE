@@ -14,13 +14,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.experimental.FieldDefaults;
 
 @Getter
 @Entity
 @Builder
 @AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Report extends BaseEntity {
 
