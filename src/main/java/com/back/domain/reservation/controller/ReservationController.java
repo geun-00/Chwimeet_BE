@@ -9,6 +9,7 @@ import com.back.global.security.SecurityUser;
 import com.back.standard.util.page.PagePayload;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/reservations")
 @RequiredArgsConstructor
@@ -45,6 +47,8 @@ public class ReservationController {
             @RequestParam(required = false) ReservationStatus status,
             @RequestParam(required = false) String keyword
             ) {
+        log.info("keyword = {}", keyword);
+        log.info("status = {}", status);
         Member author = memberService.getById(securityUser.getId());
 
         PagePayload<GuestReservationSummaryResBody> reservations = reservationService.getSentReservations(author, pageable, status, keyword);
@@ -61,6 +65,7 @@ public class ReservationController {
             @RequestParam(required = false) ReservationStatus status,
             @RequestParam(required = false) String keyword
     ) {
+
         Member member = memberService.getById(securityUser.getId());
         PagePayload<HostReservationSummaryResBody> reservations = reservationService.getReceivedReservations(postId, member, pageable, status, keyword);
 

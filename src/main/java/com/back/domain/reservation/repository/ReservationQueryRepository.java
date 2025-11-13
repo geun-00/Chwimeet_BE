@@ -8,7 +8,6 @@ import com.back.domain.reservation.entity.Reservation;
 import com.back.global.queryDsl.CustomQuerydslRepositorySupport;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
@@ -108,32 +107,30 @@ public class ReservationQueryRepository extends CustomQuerydslRepositorySupport
             String keyword,
             Pageable pageable) {
 
-        List<Reservation> content = selectFrom(reservation)
-                .leftJoin(reservation.post, post).fetchJoin()
-                .leftJoin(post.author, member).fetchJoin()
-                .leftJoin(post.images, postImage)
-                .leftJoin(reservation.reservationOptions, reservationOption).fetchJoin()
-                .leftJoin(reservationOption.postOption, postOption).fetchJoin()
-                .where(
-                        reservation.author.eq(author),
-                        statusEq(status),              // null이면 조건 무시
-                        postTitleContains(keyword)     // null이면 조건 무시
-                )
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .orderBy(reservation.id.desc())
-                .fetch();
-
-        Long total = select(reservation.count())
-                .from(reservation)
-                .where(
-                        reservation.author.eq(author),
-                        statusEq(status),
-                        postTitleContains(keyword)
-                )
-                .fetchOne();
-
-        return new PageImpl<>(content, pageable, total);
+        return applyPagination(pageable,
+                // Function<JPAQueryFactory, JPAQuery<Reservation>> contentQuery
+                queryFactory -> queryFactory
+                        .selectFrom(reservation)
+                        .leftJoin(reservation.post, post).fetchJoin()
+                        .leftJoin(post.author, member).fetchJoin()
+                        .leftJoin(post.images, postImage)
+                        .leftJoin(reservation.reservationOptions, reservationOption).fetchJoin()
+                        .leftJoin(reservationOption.postOption, postOption).fetchJoin()
+                        .where(
+                                reservation.author.eq(author),
+                                statusEq(status),
+                                postTitleContains(keyword)
+                        ),
+                // Function<JPAQueryFactory, JPAQuery<Long>> countQuery
+                queryFactory -> queryFactory
+                        .select(reservation.count())
+                        .from(reservation)
+                        .where(
+                                reservation.author.eq(author),
+                                statusEq(status),
+                                postTitleContains(keyword)
+                        )
+        );
     }
 
     @Override
@@ -142,27 +139,26 @@ public class ReservationQueryRepository extends CustomQuerydslRepositorySupport
             ReservationStatus status,
             Pageable pageable) {
 
-        List<Reservation> content = selectFrom(reservation)
-                .leftJoin(reservation.reservationOptions, reservationOption).fetchJoin()
-                .leftJoin(reservationOption.postOption, postOption).fetchJoin()
-                .where(
-                        reservation.post.eq(post),
-                        statusEq(status)              // null이면 조건 무시
-                )
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .orderBy(reservation.id.desc())
-                .fetch();
-
-        Long total = select(reservation.count())
-                .from(reservation)
-                .where(
-                        reservation.post.eq(post),
-                        statusEq(status)
-                )
-                .fetchOne();
-
-        return new PageImpl<>(content, pageable, total);
+        // contentQuery: 실제 조회할 데이터를 반환하는 쿼리 (페이징/정렬 적용 전)
+        return applyPagination(pageable,
+                // Function<JPAQueryFactory, JPAQuery<Reservation>> contentQuery
+                queryFactory -> queryFactory
+                        .selectFrom(reservation)
+                        .leftJoin(reservation.reservationOptions, reservationOption).fetchJoin()
+                        .leftJoin(reservationOption.postOption, postOption).fetchJoin()
+                        .where(
+                                reservation.post.eq(post),
+                                statusEq(status)
+                        ),
+                // Function<JPAQueryFactory, JPAQuery<Long>> countQuery
+                queryFactory -> queryFactory
+                        .select(reservation.count())
+                        .from(reservation)
+                        .where(
+                                reservation.post.eq(post),
+                                statusEq(status)
+                        )
+        );
     }
 
 
