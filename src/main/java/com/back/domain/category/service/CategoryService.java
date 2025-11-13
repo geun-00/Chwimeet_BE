@@ -1,10 +1,10 @@
-package com.back.domain.category.category.service;
+package com.back.domain.category.service;
 
-import com.back.domain.category.category.dto.CategoryCreateReqBody;
-import com.back.domain.category.category.dto.CategoryResBody;
-import com.back.domain.category.category.dto.CategoryUpdateReqBody;
-import com.back.domain.category.category.entity.Category;
-import com.back.domain.category.category.repository.CategoryRepository;
+import com.back.domain.category.dto.CategoryCreateReqBody;
+import com.back.domain.category.dto.CategoryResBody;
+import com.back.domain.category.dto.CategoryUpdateReqBody;
+import com.back.domain.category.entity.Category;
+import com.back.domain.category.repository.CategoryRepository;
 import com.back.global.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;

@@ -1,4 +1,4 @@
-package com.back.domain.category.category.common;
+package com.back.domain.category.common;
 
 public record ChildCategory(
         Long id,

@@ -2,10 +2,10 @@ package com.back.domain.region.region.controller;
 
 import com.back.domain.member.service.AuthTokenService;
 import com.back.domain.member.service.RefreshTokenStore;
-import com.back.domain.region.region.dto.RegionCreateReqBody;
-import com.back.domain.region.region.dto.RegionResBody;
-import com.back.domain.region.region.dto.RegionUpdateReqBody;
-import com.back.domain.region.region.service.RegionService;
+import com.back.domain.region.dto.RegionCreateReqBody;
+import com.back.domain.region.dto.RegionResBody;
+import com.back.domain.region.dto.RegionUpdateReqBody;
+import com.back.domain.region.service.RegionService;
 import com.back.global.security.SecurityUser;
 import com.back.global.web.CookieHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;

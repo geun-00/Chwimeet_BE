@@ -1,7 +1,7 @@
 package com.back.domain.chat.chat.controller;
 
-import com.back.domain.category.category.entity.Category;
-import com.back.domain.category.category.repository.CategoryRepository;
+import com.back.domain.category.entity.Category;
+import com.back.domain.category.repository.CategoryRepository;
 import com.back.domain.chat.chat.dto.CreateChatRoomReqBody;
 import com.back.domain.chat.chat.repository.ChatRoomRepository;
 import com.back.domain.chat.chat.service.ChatService;

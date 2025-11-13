@@ -1,7 +1,7 @@
-package com.back.domain.region.region.dto;
+package com.back.domain.region.dto;
 
-import com.back.domain.region.region.common.ChildRegion;
-import com.back.domain.region.region.entity.Region;
+import com.back.domain.region.common.ChildRegion;
+import com.back.domain.region.entity.Region;
 
 import java.util.List;
 import java.util.Optional;

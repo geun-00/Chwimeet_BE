@@ -1,8 +1,8 @@
 package com.back.domain.region.region.controller;
 
-import com.back.domain.region.region.common.ChildRegion;
-import com.back.domain.region.region.dto.RegionResBody;
-import com.back.domain.region.region.service.RegionService;
+import com.back.domain.region.common.ChildRegion;
+import com.back.domain.region.dto.RegionResBody;
+import com.back.domain.region.service.RegionService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -1,8 +1,8 @@
 package com.back.domain.category.category.controller;
 
-import com.back.domain.category.category.common.ChildCategory;
-import com.back.domain.category.category.dto.CategoryResBody;
-import com.back.domain.category.category.service.CategoryService;
+import com.back.domain.category.common.ChildCategory;
+import com.back.domain.category.dto.CategoryResBody;
+import com.back.domain.category.service.CategoryService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

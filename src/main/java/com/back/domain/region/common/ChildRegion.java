@@ -1,4 +1,4 @@
-package com.back.domain.region.region.common;
+package com.back.domain.region.common;
 
 public record ChildRegion(
         Long id,

@@ -1,7 +1,7 @@
-package com.back.domain.category.category.dto;
+package com.back.domain.category.dto;
 
-import com.back.domain.category.category.common.ChildCategory;
-import com.back.domain.category.category.entity.Category;
+import com.back.domain.category.common.ChildCategory;
+import com.back.domain.category.entity.Category;
 
 import java.util.List;
 import java.util.Optional;

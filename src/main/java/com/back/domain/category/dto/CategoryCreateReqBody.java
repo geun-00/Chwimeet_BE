@@ -1,4 +1,4 @@
-package com.back.domain.category.category.dto;
+package com.back.domain.category.dto;
 
 import jakarta.validation.constraints.NotBlank;
 

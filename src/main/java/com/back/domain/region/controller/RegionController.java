@@ -1,7 +1,7 @@
-package com.back.domain.region.region.controller;
+package com.back.domain.region.controller;
 
-import com.back.domain.region.region.dto.RegionResBody;
-import com.back.domain.region.region.service.RegionService;
+import com.back.domain.region.dto.RegionResBody;
+import com.back.domain.region.service.RegionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,4 @@
-package com.back.domain.region.region.entity;
+package com.back.domain.category.entity;
 
 import com.back.global.jpa.entity.BaseEntity;
 import jakarta.persistence.*;
@@ -12,15 +12,15 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Region extends BaseEntity {
+public class Category extends BaseEntity {
 
     @Setter
     private String name;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
-    private Region parent;
+    private Category parent;
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
-    private List<Region> children = new ArrayList<>();
+    private List<Category> children = new ArrayList<>();
 }

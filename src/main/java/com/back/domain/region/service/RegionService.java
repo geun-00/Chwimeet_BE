@@ -1,10 +1,10 @@
-package com.back.domain.region.region.service;
+package com.back.domain.region.service;
 
-import com.back.domain.region.region.dto.RegionCreateReqBody;
-import com.back.domain.region.region.dto.RegionResBody;
-import com.back.domain.region.region.dto.RegionUpdateReqBody;
-import com.back.domain.region.region.entity.Region;
-import com.back.domain.region.region.repository.RegionRepository;
+import com.back.domain.region.dto.RegionCreateReqBody;
+import com.back.domain.region.dto.RegionResBody;
+import com.back.domain.region.dto.RegionUpdateReqBody;
+import com.back.domain.region.entity.Region;
+import com.back.domain.region.repository.RegionRepository;
 import com.back.global.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;

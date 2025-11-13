@@ -1,9 +1,9 @@
-package com.back.domain.category.category.controller;
+package com.back.domain.category.controller;
 
-import com.back.domain.category.category.dto.CategoryCreateReqBody;
-import com.back.domain.category.category.dto.CategoryResBody;
-import com.back.domain.category.category.dto.CategoryUpdateReqBody;
-import com.back.domain.category.category.service.CategoryService;
+import com.back.domain.category.dto.CategoryCreateReqBody;
+import com.back.domain.category.dto.CategoryResBody;
+import com.back.domain.category.dto.CategoryUpdateReqBody;
+import com.back.domain.category.service.CategoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

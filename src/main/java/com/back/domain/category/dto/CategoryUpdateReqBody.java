@@ -1,8 +1,8 @@
-package com.back.domain.region.region.dto;
+package com.back.domain.category.dto;
 
 import jakarta.validation.constraints.NotBlank;
 
-public record RegionUpdateReqBody(
+public record CategoryUpdateReqBody(
         @NotBlank
         String name
 ) {

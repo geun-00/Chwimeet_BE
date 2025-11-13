@@ -1,7 +1,7 @@
 package com.back.domain.post.post.service;
 
-import com.back.domain.category.category.entity.Category;
-import com.back.domain.category.category.repository.CategoryRepository;
+import com.back.domain.category.entity.Category;
+import com.back.domain.category.repository.CategoryRepository;
 import com.back.domain.member.dto.AuthorDto;
 import com.back.domain.member.entity.Member;
 import com.back.domain.member.repository.MemberRepository;
@@ -14,8 +14,8 @@ import com.back.domain.post.post.entity.*;
 import com.back.domain.post.post.repository.PostFavoriteRepository;
 import com.back.domain.post.post.repository.PostOptionRepository;
 import com.back.domain.post.post.repository.PostRepository;
-import com.back.domain.region.region.entity.Region;
-import com.back.domain.region.region.repository.RegionRepository;
+import com.back.domain.region.entity.Region;
+import com.back.domain.region.repository.RegionRepository;
 import com.back.global.exception.ServiceException;
 import com.back.standard.util.page.PagePayload;
 import com.back.standard.util.page.PageUt;

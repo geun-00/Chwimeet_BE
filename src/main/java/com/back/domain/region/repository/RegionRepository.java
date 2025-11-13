@@ -1,6 +1,6 @@
-package com.back.domain.region.region.repository;
+package com.back.domain.region.repository;
 
-import com.back.domain.region.region.entity.Region;
+import com.back.domain.region.entity.Region;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
