@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
@@ -76,7 +77,7 @@ public class SecurityConfig {
                                             response.setStatus(401);
                                             response.getWriter().write(
                                                     JsonUt.toString(
-                                                            new RsData<Void>("401-1", "로그인 후 이용해주세요.")
+                                                            new RsData<Void>(HttpStatus.UNAUTHORIZED, "로그인 후 이용해주세요.")
                                                     )
                                             );
                                         }
@@ -88,7 +89,7 @@ public class SecurityConfig {
                                             response.setStatus(403);
                                             response.getWriter().write(
                                                     JsonUt.toString(
-                                                            new RsData<Void>("403-1", "권한이 없습니다.")
+                                                            new RsData<Void>(HttpStatus.FORBIDDEN, "권한이 없습니다.")
                                                     )
                                             );
                                         }
