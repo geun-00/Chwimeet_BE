@@ -44,13 +44,8 @@ public class ChatService {
             return new CreateChatRoomResBody("이미 존재하는 채팅방입니다.", roomId);
         }
 
-        ChatRoom chatRoom = ChatRoom.builder()
-                .post(post)
-                .build();
-
         Member guest = memberRepository.findById(memberId).orElseThrow(() -> new ServiceException(HttpStatus.NOT_FOUND, "존재하지 않는 회원입니다."));
-        chatRoom.addMember(host);
-        chatRoom.addMember(guest);
+        ChatRoom chatRoom = ChatRoom.create(post, host, guest);
 
         chatRoomRepository.save(chatRoom);
 

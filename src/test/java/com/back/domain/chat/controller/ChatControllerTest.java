@@ -27,6 +27,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -75,103 +77,115 @@ class ChatControllerTest {
         memberRepository.deleteAll();
 
         // 회원 생성
-        member1 = memberRepository.save(Member.builder()
-                .email("user1@test.com")
-                .password("1234")
-                .name("홍길동")
-                .phoneNumber("010-1111-1111")
-                .address1("서울시 강남구")
-                .address2("테헤란로 123")
-                .nickname("hong")
-                .isBanned(false)
-                .role(MemberRole.USER)
-                .profileImgUrl(null)
-                .build()
-        );
+        member1 = memberRepository.save(new Member(
+                "user1@test.com",
+                "1234",
+                "홍길동",
+                "010-1111-1111",
+                "서울시 강남구",
+                "테헤란로 123",
+                "hong",
+                false,
+                MemberRole.USER,
+                null
+        ));
 
-        member2 = memberRepository.save(Member.builder()
-                .email("user2@test.com")
-                .password("1234")
-                .name("김철수")
-                .phoneNumber("010-2222-2222")
-                .address1("서울시 서초구")
-                .address2("서초대로 456")
-                .nickname("kim")
-                .isBanned(false)
-                .role(MemberRole.USER)
-                .profileImgUrl(null)
-                .build()
-        );
+        member2 = memberRepository.save(new Member(
+                "user2@test.com",
+                "1234",
+                "김철수",
+                "010-2222-2222",
+                "서울시 서초구",
+                "서초대로 456",
+                "kim",
+                false,
+                MemberRole.USER,
+                null
+        ));
 
-        member3 = memberRepository.save(Member.builder()
-                .email("user3@test.com")
-                .password("1234")
-                .name("이영희")
-                .phoneNumber("010-3333-3333")
-                .address1("서울시 마포구")
-                .address2("월드컵북로 789")
-                .nickname("lee")
-                .isBanned(false)
-                .role(MemberRole.USER)
-                .profileImgUrl(null)
-                .build()
-        );
+        member3 = memberRepository.save(new Member(
+                "user3@test.com",
+                "1234",
+                "이영희",
+                "010-3333-3333",
+                "서울시 마포구",
+                "월드컵북로 789",
+                "lee",
+                false,
+                MemberRole.USER,
+                null
+        ));
 
-        member4 = memberRepository.save(Member.builder()
-                .email("user4@test.com")
-                .password("1234")
-                .name("박민수")
-                .phoneNumber("010-4444-4444")
-                .address1("서울시 송파구")
-                .address2("잠실로 101")
-                .nickname("park")
-                .isBanned(false)
-                .role(MemberRole.USER)
-                .profileImgUrl(null)
-                .build()
-        );
+        member4 = memberRepository.save(new Member(
+                "user4@test.com",
+                "1234",
+                "박민수",
+                "010-4444-4444",
+                "서울시 송파구",
+                "잠실로 101",
+                "park",
+                false,
+                MemberRole.USER,
+                null
+        ));
 
         // 게시글 생성
-        Category category = categoryRepository.save(Category.builder()
-                .name("노트북")
-                .parent(null)
-                .build());
+        Category category = categoryRepository.save(new Category(
+                "노트북",
+                null,
+                null
+        ));
 
-        post1 = postRepository.save(Post.builder()
-                .title("캠핑 텐트 대여")
-                .content("4인용 텐트입니다.")
-                .receiveMethod(ReceiveMethod.DELIVERY)
-                .returnMethod(ReturnMethod.DELIVERY)
-                .deposit(10000)
-                .fee(5000)
-                .author(member2)
-                .category(category)
-                .build()
-        );
+        post1 = postRepository.save(new Post(
+                "캠핑 텐트 대여",
+                "4인용 텐트입니다.",
+                ReceiveMethod.DELIVERY,
+                ReturnMethod.DELIVERY,
+                null,
+                null,
+                10000,
+                5000,
+                false,
+                member2,
+                new ArrayList<>(),   // options
+                new ArrayList<>(),   // images
+                new ArrayList<>(),   // postRegions
+                category
+        ));
 
-        post2 = postRepository.save(Post.builder()
-                .title("노트북 대여합니다")
-                .content("맥북 프로입니다.")
-                .receiveMethod(ReceiveMethod.DIRECT)
-                .returnMethod(ReturnMethod.DIRECT)
-                .deposit(50000)
-                .fee(20000)
-                .author(member3)
-                .category(category)
-                .build()
-        );
+        post2 = postRepository.save(new Post(
+                "노트북 대여합니다",
+                "맥북 프로입니다.",
+                ReceiveMethod.DIRECT,
+                ReturnMethod.DIRECT,
+                null,
+                null,
+                50000,
+                20000,
+                false,
+                member3,
+                new ArrayList<>(),
+                new ArrayList<>(),
+                new ArrayList<>(),
+                category
+        ));
 
-        post3 = postRepository.save(Post.builder()
-                .title("카메라 렌탈")
-                .content("소니 A7III입니다.")
-                .receiveMethod(ReceiveMethod.ANY)
-                .returnMethod(ReturnMethod.ANY)
-                .deposit(30000)
-                .fee(15000)
-                .author(member4)
-                .category(category)
-                .build()
-        );
+        post3 = postRepository.save(new Post(
+                "카메라 렌탈",
+                "소니 A7III입니다.",
+                ReceiveMethod.ANY,
+                ReturnMethod.ANY,
+                null,
+                null,
+                30000,
+                15000,
+                false,
+                member4,
+                new ArrayList<>(),
+                new ArrayList<>(),
+                new ArrayList<>(),
+                category
+        ));
 
         // member1이 여러 채팅방 생성
         chatService.createOrGetChatRoom(post1.getId(), member1.getId());  // member1 <-> member2
@@ -258,7 +272,7 @@ class ChatControllerTest {
 //        // then
 //        resultActions
 //                .andExpect(status().isBadRequest())
-//                .andExpect(jsonPath("$.resultCode").value("400-1"))
+//                .andExpect(jsonPath("$.status").value(400))
 //                .andExpect(jsonPath("$.msg").value("본인과 채팅방을 만들 수 없습니다."));
 //    }
 
