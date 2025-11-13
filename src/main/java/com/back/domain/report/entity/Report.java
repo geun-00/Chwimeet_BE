@@ -3,6 +3,7 @@ package com.back.domain.report.entity;
 import com.back.domain.member.member.entity.Member;
 import com.back.domain.report.common.ReportType;
 import com.back.global.jpa.entity.BaseEntity;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -20,15 +21,19 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Report extends BaseEntity {
 
-    Long targetId;
-    String comment;
+    @Column(nullable = false)
+    private Long targetId;
+
+    @Column(nullable = false)
+    private String comment;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    Member member;
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
 
     @Enumerated(EnumType.STRING)
-    ReportType reportType;
+    @Column(nullable = false)
+    private ReportType reportType;
 
     public static Report create(Long targetId, String comment, Member member, ReportType reportType) {
         return new Report(targetId, comment, member, reportType);
