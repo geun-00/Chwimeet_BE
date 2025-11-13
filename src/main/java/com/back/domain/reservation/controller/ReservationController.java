@@ -74,23 +74,23 @@ public class ReservationController implements ReservationApi {
     }
 
     @Transactional(readOnly = true)
-    @GetMapping("/{reservationId}")
+    @GetMapping("/{id}")
     public ResponseEntity<RsData<ReservationDto>> getReservationDetail(
-            @PathVariable Long reservationId,
+            @PathVariable Long id,
             @AuthenticationPrincipal SecurityUser securityUser
             ) {
-        ReservationDto reservationDto = reservationService.getReservationDtoById(reservationId, securityUser.getId());
-        return ResponseEntity.ok(new RsData<>(HttpStatus.OK, "%d번 예약 상세 정보입니다.".formatted(reservationId), reservationDto));
+        ReservationDto reservationDto = reservationService.getReservationDtoById(id, securityUser.getId());
+        return ResponseEntity.ok(new RsData<>(HttpStatus.OK, "%d번 예약 상세 정보입니다.".formatted(id), reservationDto));
     }
 
     @Transactional
-    @PatchMapping("/{reservationId}/status")
+    @PatchMapping("/{id}/status")
     public ResponseEntity<RsData<ReservationDto>> updateReservationStatus(
-            @PathVariable Long reservationId,
+            @PathVariable Long id,
             @AuthenticationPrincipal SecurityUser securityUser,
             @Valid @RequestBody UpdateReservationStatusReqBody reqBody ) {
-        ReservationDto reservationDto = reservationService.updateReservationStatus(reservationId, securityUser.getId(), reqBody);
-        return ResponseEntity.ok(new RsData<>(HttpStatus.OK, "%d번 예약 상태가 업데이트 되었습니다.".formatted(reservationId), reservationDto));
+        ReservationDto reservationDto = reservationService.updateReservationStatus(id, securityUser.getId(), reqBody);
+        return ResponseEntity.ok(new RsData<>(HttpStatus.OK, "%d번 예약 상태가 업데이트 되었습니다.".formatted(id), reservationDto));
     }
 
     @Transactional
