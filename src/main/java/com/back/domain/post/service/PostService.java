@@ -9,10 +9,7 @@ import com.back.domain.post.dto.req.PostUpdateReqBody;
 import com.back.domain.post.dto.res.PostDetailResBody;
 import com.back.domain.post.dto.res.PostListResBody;
 import com.back.domain.post.entity.*;
-import com.back.domain.post.repository.PostFavoriteRepository;
-import com.back.domain.post.repository.PostOptionRepository;
-import com.back.domain.post.repository.PostQueryRepository;
-import com.back.domain.post.repository.PostRepository;
+import com.back.domain.post.repository.*;
 import com.back.domain.region.entity.Region;
 import com.back.domain.region.repository.RegionRepository;
 import com.back.global.exception.ServiceException;
@@ -35,6 +32,7 @@ public class PostService {
     private final PostOptionRepository postOptionRepository;
     private final PostFavoriteRepository postFavoriteRepository;
     private final PostQueryRepository postQueryRepository;
+    private final PostFavoriteQueryRepository postFavoriteQueryRepository;
 
     private final RegionRepository regionRepository;
     private final CategoryRepository categoryRepository;
@@ -129,7 +127,7 @@ public class PostService {
 
     public PagePayload<PostListResBody> getFavoritePosts(long memberId, Pageable pageable) {
 
-        Page<PostFavorite> favorites = this.postFavoriteRepository.findAllByMemberId(memberId, pageable);
+        Page<PostFavorite> favorites = this.postFavoriteQueryRepository.findFavoritePosts(memberId, pageable);
 
         Page<PostListResBody> result = favorites.map(f -> PostListResBody.of(f.getPost(), true));
 
