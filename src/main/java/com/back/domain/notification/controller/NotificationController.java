@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,6 +24,11 @@ import org.springframework.web.bind.annotation.*;
 public class NotificationController implements NotificationApi {
 
     private final NotificationService notificationService;
+
+    @GetMapping("/subscribe")
+    public SseEmitter subscribe(@AuthenticationPrincipal SecurityUser securityUser) {
+        return notificationService.subscribe(securityUser.getId());
+    }
 
     @GetMapping
     public ResponseEntity<RsData<PagePayload<NotificationResBody<? extends NotificationData>>>> readNotifications(

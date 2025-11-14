@@ -11,14 +11,17 @@ import com.back.domain.notification.repository.NotificationRepository;
 import com.back.domain.reservation.entity.Reservation;
 import com.back.domain.reservation.repository.ReservationQueryRepository;
 import com.back.global.exception.ServiceException;
+import com.back.global.sse.EmitterRepository;
 import com.back.standard.util.page.PagePayload;
 import com.back.standard.util.page.PageUt;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.*;
 import java.util.function.Function;
@@ -26,6 +29,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
+@Slf4j
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
@@ -33,17 +37,21 @@ public class NotificationService {
     private final ReservationQueryRepository reservationQueryRepository;
     private final List<NotificationDataMapper<? extends NotificationData>> mappers;
     private final Map<NotificationType.GroupType, Function<List<Long>, Map<Long, ?>>> batchLoaders = new HashMap<>();
+    private final EmitterRepository emitterRepository;
+    private static final Long TIMEOUT = 60L * 1000 * 60; // 1시간
 
     public NotificationService(
             NotificationRepository notificationRepository,
             NotificationQueryRepository notificationQueryRepository,
             ReservationQueryRepository reservationQueryRepository,
-            List<NotificationDataMapper<? extends NotificationData>> mappers
+            List<NotificationDataMapper<? extends NotificationData>> mappers,
+            EmitterRepository emitterRepository
     ) {
         this.notificationRepository = notificationRepository;
         this.notificationQueryRepository = notificationQueryRepository;
         this.reservationQueryRepository = reservationQueryRepository;
         this.mappers = mappers;
+        this.emitterRepository = emitterRepository;
         setBatchLoaders();
     }
 
@@ -52,6 +60,39 @@ public class NotificationService {
                 reservationQueryRepository.findWithPostAndAuthorByIds(targetIds)
                         .stream().collect(Collectors.toMap(Reservation::getId, r -> r))
         );
+    }
+
+    public SseEmitter subscribe(Long memberId) {
+        String emitterId = memberId + "_" + System.currentTimeMillis();
+        SseEmitter emitter = createAndSaveEmitter(memberId, emitterId);
+
+        sendInitialEvent(memberId, emitterId, emitter);
+        registerEmitterCallbacks(memberId, emitterId, emitter);
+
+        return emitter;
+    }
+
+    private SseEmitter createAndSaveEmitter(Long memberId, String emitterId) {
+        SseEmitter emitter = new SseEmitter(TIMEOUT);
+        emitterRepository.save(memberId, emitterId, emitter);
+        return emitter;
+    }
+
+    private void sendInitialEvent(Long memberId, String emitterId, SseEmitter emitter) {
+        try {
+            emitter.send(SseEmitter.event()
+                    .id(emitterId)
+                    .data("connected"));
+        } catch (Exception e) {
+            log.error("SSE 발행 중 예외 발생: memberId={}, emitterId={}, error={}",
+                    memberId, emitterId, e.getMessage(), e);
+        }
+    }
+
+    private void registerEmitterCallbacks(Long memberId, String emitterId, SseEmitter emitter) {
+        emitter.onCompletion(() -> emitterRepository.deleteEmitter(memberId, emitterId));
+        emitter.onTimeout(() -> emitterRepository.deleteEmitter(memberId, emitterId));
+        emitter.onError(e -> emitterRepository.deleteEmitter(memberId, emitterId));
     }
 
     public NotificationUnreadResBody hasUnread(Long memberId) {

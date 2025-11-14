@@ -15,9 +15,13 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @Tag(name = "Notification API", description = "알림 API, 인증 정보 필요")
 public interface NotificationApi {
+
+    @Operation(summary = "알림 SSE 연결 API", description = "알림 도메인 SSE 연결")
+    SseEmitter subscribe(@AuthenticationPrincipal SecurityUser securityUser);
 
     @Operation(summary = "알림 목록 페이징 조회 API", description = "알림 목록 페이징 조회")
     ResponseEntity<RsData<PagePayload<NotificationResBody<? extends NotificationData>>>> readNotifications(
