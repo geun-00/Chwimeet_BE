@@ -20,6 +20,6 @@ public class UserReportValidator implements ReportValidator {
             log.error("신고 대상(Member) 없음(targetId: {})", targetId);
         }
 
-        return reportType == ReportType.USER && exists;
+        return reportType == ReportType.MEMBER && exists;
     }
 }
