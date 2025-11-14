@@ -9,9 +9,7 @@ import com.back.domain.post.dto.req.PostUpdateReqBody;
 import com.back.domain.post.dto.res.PostDetailResBody;
 import com.back.domain.post.dto.res.PostListResBody;
 import com.back.domain.post.entity.*;
-import com.back.domain.post.repository.PostFavoriteRepository;
-import com.back.domain.post.repository.PostOptionRepository;
-import com.back.domain.post.repository.PostRepository;
+import com.back.domain.post.repository.*;
 import com.back.domain.region.entity.Region;
 import com.back.domain.region.repository.RegionRepository;
 import com.back.global.exception.ServiceException;
@@ -33,6 +31,8 @@ public class PostService {
     private final MemberRepository memberRepository;
     private final PostOptionRepository postOptionRepository;
     private final PostFavoriteRepository postFavoriteRepository;
+    private final PostQueryRepository postQueryRepository;
+    private final PostFavoriteQueryRepository postFavoriteQueryRepository;
 
     private final RegionRepository regionRepository;
     private final CategoryRepository categoryRepository;
@@ -74,7 +74,7 @@ public class PostService {
 
         if (regionIds != null && regionIds.isEmpty()) regionIds = null;
 
-        Page<Post> postPage = hasFilter ? this.postRepository.findFilteredPosts(keyword, categoryId, regionIds, pageable) : this.postRepository.findAll(pageable);
+        Page<Post> postPage = hasFilter ? this.postQueryRepository.findFilteredPosts(keyword, categoryId, regionIds, pageable) : this.postRepository.findAll(pageable);
 
         Page<PostListResBody> mappedPage = postPage.map(post -> {
 
@@ -96,7 +96,7 @@ public class PostService {
     }
 
     public PagePayload<PostListResBody> getMyPosts(Long memberId, Pageable pageable) {
-        Page<PostListResBody> result = this.postRepository.findAllByAuthorId(memberId, pageable).map(p -> PostListResBody.of(p, false));
+        Page<PostListResBody> result = this.postQueryRepository.findMyPost(memberId, pageable).map(p -> PostListResBody.of(p, false));
 
         return PageUt.of(result);
     }
@@ -114,7 +114,7 @@ public class PostService {
         Member member = this.memberRepository.findById(memberId).orElseThrow(() -> new ServiceException(HttpStatus.NOT_FOUND, "존재하지 않는 회원입니다."));
 
         if (post.getAuthor().getId().equals(member.getId()))
-            throw new ServiceException(HttpStatus.NOT_FOUND, "본인의 게시글은 즐겨찾기 할 수 없습니다.");
+            throw new ServiceException(HttpStatus.FORBIDDEN, "본인의 게시글은 즐겨찾기 할 수 없습니다.");
 
         return this.postFavoriteRepository.findByMemberIdAndPostId(memberId, postId).map(fav -> {
             this.postFavoriteRepository.delete(fav);
@@ -127,7 +127,7 @@ public class PostService {
 
     public PagePayload<PostListResBody> getFavoritePosts(long memberId, Pageable pageable) {
 
-        Page<PostFavorite> favorites = this.postFavoriteRepository.findAllByMemberId(memberId, pageable);
+        Page<PostFavorite> favorites = this.postFavoriteQueryRepository.findFavoritePosts(memberId, pageable);
 
         Page<PostListResBody> result = favorites.map(f -> PostListResBody.of(f.getPost(), true));
 
