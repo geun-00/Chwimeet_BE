@@ -39,6 +39,7 @@ public class Reservation extends BaseEntity {
 
     private String cancelReason;
     private String rejectReason;
+    private String claimReason;
 
     private LocalDate reservationStartAt;
     private LocalDate reservationEndAt;
@@ -94,7 +95,6 @@ public class Reservation extends BaseEntity {
      * - PENDING_REFUND (환급 예정)
      * - REFUND_COMPLETED (환급 완료)
      * - LOST_OR_UNRETURNED (미반납/분실)
-     * - CLAIMING (청구 시작)
      * - CLAIM_COMPLETED (청구 완료)
      */
     public void changeStatus(ReservationStatus newStatus) {
@@ -121,6 +121,24 @@ public class Reservation extends BaseEntity {
         validateTransition(ReservationStatus.CANCELLED);
         this.status = ReservationStatus.CANCELLED;
         this.cancelReason = reason;
+    }
+
+    /**
+     * 청구 (사유 필요)
+     */
+    public void claim(String reason) {
+        validateTransition(ReservationStatus.CLAIMING);
+        this.status = ReservationStatus.CLAIMING;
+        this.claimReason = reason;
+    }
+
+    /**
+     * 대여 검수 → 반납 대기 (검수 중 문제 발견)
+     */
+    public void failRentalInspection(String reason) {
+        validateTransition(ReservationStatus.PENDING_RETURN);
+        this.status = ReservationStatus.PENDING_RETURN;
+        this.cancelReason = reason;  // 검수 실패 사유
     }
 
     /**

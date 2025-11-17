@@ -328,6 +328,7 @@ public class ReservationService {
             // 추가 데이터가 필요한 경우
             case REJECTED -> reservation.reject(reqBody.rejectReason());
             case CANCELLED -> reservation.cancel(reqBody.cancelReason());
+            case CLAIMING -> reservation.claim(reqBody.claimReason());
             case SHIPPING -> reservation.startShipping(
                     reqBody.receiveCarrier(),
                     reqBody.receiveTrackingNumber()
@@ -336,19 +337,27 @@ public class ReservationService {
                     reqBody.returnCarrier(),
                     reqBody.returnTrackingNumber()
             );
+            // 반납 대기
+            case PENDING_RETURN -> {
+                // 대여 검수 -> 반납 대기 (검수 실패)
+                if (reservation.getStatus() == ReservationStatus.INSPECTING_RENTAL) {
+                    reservation.failRentalInspection(reqBody.cancelReason());
+                } else {
+                    // 대여 중 -> 반납 대기 (정상 반납 요청)
+                    reservation.changeStatus(reqBody.status());
+                }
+            }
 
             // 단순 상태 전환 (명시적으로 나열)
             case PENDING_PAYMENT,
                  PENDING_PICKUP,
                  INSPECTING_RENTAL,
                  RENTING,
-                 PENDING_RETURN,
                  RETURN_COMPLETED,
                  INSPECTING_RETURN,
                  PENDING_REFUND,
                  REFUND_COMPLETED,
                  LOST_OR_UNRETURNED,
-                 CLAIMING,
                  CLAIM_COMPLETED -> reservation.changeStatus(reqBody.status());
 
             // 지원하지 않는 상태
