@@ -501,7 +501,7 @@ resource "aws_eip" "eip-team1" {
 resource "aws_instance" "ec2-team1" {
   ami           = data.aws_ami.latest-amazon-linux.id
   instance_type = "t3.small"
-  key_name = "team1_key"
+  key_name = "team1-key"
   subnet_id     = aws_subnet.subnet-team1-a.id
   vpc_security_group_ids = [aws_security_group.sg-team1.id]
   associate_public_ip_address = true
