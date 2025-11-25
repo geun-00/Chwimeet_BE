@@ -9,6 +9,7 @@ import com.back.domain.post.dto.res.PostListResBody;
 import com.back.domain.post.service.PostContentGenerateService;
 import com.back.domain.post.service.PostService;
 import com.back.domain.review.service.ReviewSummaryService;
+import com.back.global.annotations.ValidateImages;
 import com.back.global.rsData.RsData;
 import com.back.global.security.SecurityUser;
 import com.back.standard.util.page.PagePayload;
@@ -142,7 +143,7 @@ public class PostController implements PostApi {
 
     @PostMapping("/genDetail")
     public ResponseEntity<RsData<GenPostDetailResBody>> genDetail(
-            @RequestPart("images") List<MultipartFile> imageFiles,
+            @ValidateImages @RequestPart("images") List<MultipartFile> imageFiles,
             @RequestPart(name = "additionalInfo", required = false) String additionalInfo) {
         GenPostDetailResBody result = postContentGenerateService.generatePostDetail(imageFiles, additionalInfo);
         RsData<GenPostDetailResBody> response = new RsData<>(HttpStatus.OK, "응답 생성 성공", result);

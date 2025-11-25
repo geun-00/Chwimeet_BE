@@ -4,7 +4,6 @@ import com.back.domain.category.dto.CategoryResBody;
 import com.back.domain.category.entity.Category;
 import com.back.domain.category.repository.CategoryRepository;
 import com.back.domain.post.dto.res.GenPostDetailResBody;
-import com.back.global.validator.OpenAiImageInputValidator;
 import com.back.standard.util.json.JsonUt;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
@@ -30,8 +29,6 @@ public class PostContentGenerateService {
     private String defaultUserPrompt;
 
     public GenPostDetailResBody generatePostDetail(List<MultipartFile> imageFiles, String additionalInfo) {
-        OpenAiImageInputValidator.validateImages(imageFiles);
-
         String categoriesJson = getCategoriesJson();
 
         String userPrompt = defaultUserPrompt
