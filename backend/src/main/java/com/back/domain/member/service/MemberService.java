@@ -1,6 +1,7 @@
 package com.back.domain.member.service;
 
 import com.back.domain.member.common.MemberRole;
+import com.back.domain.member.dto.MemberDto;
 import com.back.domain.member.dto.MemberJoinReqBody;
 import com.back.domain.member.dto.MemberUpdateReqBody;
 import com.back.domain.member.entity.Member;
@@ -77,5 +78,19 @@ public class MemberService {
 
     public boolean existsByNickname(String nickname) {
         return memberRepository.existsByNickname(nickname);
+    }
+
+    public MemberDto banMember(Long memberId) {
+        Member member = getById(memberId);
+        member.ban();
+        memberRepository.save(member);
+        return new MemberDto(member);
+    }
+
+    public MemberDto unbanMember(Long id) {
+        Member member = getById(id);
+        member.unban();
+        memberRepository.save(member);
+        return new MemberDto(member);
     }
 }
