@@ -326,7 +326,6 @@ public class PostService {
             throw new ServiceException(HttpStatus.BAD_REQUEST, "%d번 글은 이미 차단되었습니다.".formatted(postId));
         }
         post.ban();
-        postRepository.save(post);
         return PostBannedResBody.of(post);
     }
 
@@ -340,7 +339,6 @@ public class PostService {
             throw new ServiceException(HttpStatus.BAD_REQUEST, "%d번 글은 제재되지 않았습니다.".formatted(postId));
         }
         post.unban();
-        postRepository.save(post);
         return PostBannedResBody.of(post);
     }
 }

@@ -60,7 +60,6 @@ public class ReviewService {
             throw new ServiceException(HttpStatus.BAD_REQUEST, "이미 제재된 리뷰입니다.");
         }
         review.ban();
-        reviewRepository.save(review);
         return ReviewBannedResBody.of(review);
     }
 
@@ -73,7 +72,6 @@ public class ReviewService {
             throw new ServiceException(HttpStatus.BAD_REQUEST, "제재되지 않은 리뷰입니다.");
         }
         review.unban();
-        reviewRepository.save(review);
         return ReviewBannedResBody.of(review);
     }
 }

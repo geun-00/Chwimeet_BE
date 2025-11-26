@@ -89,7 +89,6 @@ public class MemberService {
             throw new ServiceException(HttpStatus.BAD_REQUEST, "이미 차단된 회원입니다.");
         }
         member.ban();
-        memberRepository.save(member);
         return MemberBannedResBody.of(member);
     }
 
@@ -100,7 +99,6 @@ public class MemberService {
             throw new ServiceException(HttpStatus.BAD_REQUEST, "차단되지 않은 회원입니다.");
         }
         member.unban();
-        memberRepository.save(member);
         return MemberBannedResBody.of(member);
     }
 }
