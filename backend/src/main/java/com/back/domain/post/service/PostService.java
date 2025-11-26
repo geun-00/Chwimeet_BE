@@ -6,10 +6,7 @@ import com.back.domain.member.entity.Member;
 import com.back.domain.member.repository.MemberRepository;
 import com.back.domain.post.dto.req.PostCreateReqBody;
 import com.back.domain.post.dto.req.PostUpdateReqBody;
-import com.back.domain.post.dto.res.PostCreateResBody;
-import com.back.domain.post.dto.res.PostDetailResBody;
-import com.back.domain.post.dto.res.PostImageResBody;
-import com.back.domain.post.dto.res.PostListResBody;
+import com.back.domain.post.dto.res.*;
 import com.back.domain.post.entity.*;
 import com.back.domain.post.repository.*;
 import com.back.domain.region.entity.Region;
@@ -317,5 +314,26 @@ public class PostService {
 
     public List<LocalDateTime> getReservedDates(Long id) {
         return postQueryRepository.findReservedDatesFromToday(id);
+    }
+
+    public PostBannedResBody banPost(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(
+                        () -> new ServiceException(HttpStatus.NOT_FOUND, "%d번 글은 존재하지 않는 게시글입니다.".formatted(postId))
+                        );
+        post.ban();
+        postRepository.save(post);
+        return PostBannedResBody.of(post);
+    }
+
+
+    public PostBannedResBody unbanPost(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(
+                        () -> new ServiceException(HttpStatus.NOT_FOUND, "%d번 글은 존재하지 않는 게시글입니다.".formatted(postId))
+                );
+        post.unban();
+        postRepository.save(post);
+        return PostBannedResBody.of(post);
     }
 }
