@@ -3,4 +3,4 @@ spring:
     url: ${SPRING__DATASOURCE__URL}
     username: ${SPRING__DATASOURCE__USERNAME}
     password: ${SPRING__DATASOURCE__PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    driver-class-name: org.mariadb.jdbc.Driver
