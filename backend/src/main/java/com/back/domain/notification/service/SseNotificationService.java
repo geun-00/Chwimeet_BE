@@ -54,7 +54,7 @@ public class SseNotificationService {
         emitter.onError(e -> emitterRepository.deleteEmitter(memberId, emitterId));
     }
 
-    @Async
+    @Async("notificationExecutor")
     public void sendNotification(Long targetMemberId, NotificationResBody<? extends NotificationData> message) {
         Map<String, SseEmitter> emitters = emitterRepository.findEmittersByMemberId(targetMemberId);
 
