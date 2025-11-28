@@ -105,13 +105,17 @@ jobs:
           SPRING__DATASOURCE__URL: jdbc:mariadb://localhost:3306/chwimeet?currentSchema=chwimeet
           SPRING__DATASOURCE__USERNAME: root
           SPRING__DATASOURCE__PASSWORD: ${{ secrets.DB_PASSWORD }}
+          SPRING__JPA__HIBERNATE__DDL_AUTO: update
         run: |
           echo "=== Initializing DB Schema with JPA ==="
-          # JPA로 스키마 생성 (compileJava 시 자동 실행됨)
-          ./gradlew compileJava --no-daemon
+          # Spring Boot를 30초만 실행해서 JPA가 스키마 생성하게 함
+          timeout 30s ./gradlew bootRun --no-daemon || true
+          
+          # 스키마 생성 확인
+          docker exec chwimeet-mariadb mysql -uroot -p${{ secrets.DB_PASSWORD }} -e "USE chwimeet; SHOW TABLES;"
           echo "✅ Schema initialized"
 
-      # JOOQ 생성 (환경변수 직접 전달)
+        # JOOQ 생성 (환경변수 직접 전달)
       - name: Generate JOOQ sources
         env:
           SPRING__DATASOURCE__URL: jdbc:mariadb://localhost:3306/chwimeet?currentSchema=chwimeet
