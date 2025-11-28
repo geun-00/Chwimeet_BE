@@ -48,6 +48,12 @@ public class ReportService {
         Member reporter = memberRepository.findById(reporterId)
                                           .orElseThrow(() -> new ServiceException(HttpStatus.NOT_FOUND, "존재하지 않는 회원입니다."));
 
+        // 중복 신고 방지 로직 추가
+        if (reportRepository.existsByMemberIdAndTargetIdAndReportType(
+                reporterId, reqBody.targetId(), reqBody.reportType())) {
+            throw new ServiceException(HttpStatus.BAD_REQUEST, "이미 신고한 대상입니다.");
+        }
+
         Report savedReport = reportRepository.save(Report.create(
                 reqBody.targetId(), reqBody.comment(), reporter, reqBody.reportType()
         ));
