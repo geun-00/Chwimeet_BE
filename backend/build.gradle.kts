@@ -135,6 +135,10 @@ jooq {
     }
 }
 
+tasks.named("compileJava") {
+    dependsOn("generateJooq")
+}
+
 // ✅ JaCoCo 버전을 Java 25를 지원하는 최신 버전으로 업데이트
 jacoco {
     toolVersion = "0.8.13" // Java 25 지원
