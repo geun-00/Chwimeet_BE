@@ -136,6 +136,10 @@ jobs:
 
       # 테스트 + 커버리지
       - name: Run tests (JUnit5) with coverage
+        env:
+          SPRING__DATASOURCE__URL: jdbc:mariadb://localhost:3306/chwimeet
+          SPRING__DATASOURCE__USERNAME: root
+          SPRING__DATASOURCE__PASSWORD: ${{ secrets.DB_PASSWORD }}
         run: ./gradlew test jacocoTestReport -x generateJooq --info --stacktrace --no-daemon
 
       # 빌드(테스트/커버리지 재실행 방지)
