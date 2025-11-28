@@ -69,17 +69,6 @@ jobs:
           echo "${{ secrets.DOT_ENV_CI }}" > .env
           echo "✅ .env file created"
 
-      # .env 내용을 환경변수로 로드
-      - name: Load .env to environment
-        working-directory: backend
-        run: |
-          set -a
-          source .env
-          set +a
-          echo "SPRING__DATASOURCE__URL=${SPRING__DATASOURCE__URL}" >> $GITHUB_ENV
-          echo "SPRING__DATASOURCE__USERNAME=${SPRING__DATASOURCE__USERNAME}" >> $GITHUB_ENV
-          echo "SPRING__DATASOURCE__PASSWORD=${SPRING__DATASOURCE__PASSWORD}" >> $GITHUB_ENV
-
       # Docker Compose로 MariaDB & Redis 시작
       - name: Start MariaDB and Redis
         working-directory: backend
@@ -112,10 +101,23 @@ jobs:
         run: |
           ./gradlew --version
           java -version
+      - name: Generate JOOQ sources
+        run: |
+          echo "=== Starting JOOQ Generation ==="
+          ./gradlew generateJooq --info --stacktrace --no-daemon 2>&1 | tee jooq-generation.log
+          echo "=== JOOQ Generation Complete ==="
+          
+          if [ -d "build/generated-src/jooq/main" ]; then
+            echo "✅ JOOQ directory exists"
+            ls -la build/generated-src/jooq/main/com/back/jooq/tables/ || echo "No tables generated"
+          else
+            echo "❌ JOOQ directory NOT found"
+            exit 1
+          fi
 
       # 테스트 + 커버리지
       - name: Run tests (JUnit5) with coverage
-        run: ./gradlew generateJooq test jacocoTestReport --info --stacktrace --no-daemon
+        run: ./gradlew test jacocoTestReport --info --stacktrace --no-daemon
 
       # 빌드(테스트/커버리지 재실행 방지)
       - name: Assemble (no tests)
