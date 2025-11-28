@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -131,7 +132,16 @@ public class NotificationService {
                 emitter.send(SseEmitter.event()
                         .id(emitterId)
                         .data(message));
+                log.debug("알림 전송 성공: memberId={}, emitterId={}", targetMemberId, emitterId);
+            } catch (IOException e) {
+                // 클라이언트 연결 끊김 - 정상적인 상황
+                log.debug("클라이언트 연결 끊김 감지 (memberId={}, emitterId={}): {}",
+                        targetMemberId, emitterId, e.getMessage());
+                emitterRepository.deleteEmitter(targetMemberId, emitterId);
             } catch (Exception e) {
+                // 기타 예외 - 예상치 못한 에러
+                log.error("알림 전송 중 예외 발생 (memberId={}, emitterId={})",
+                        targetMemberId, emitterId, e);
                 emitterRepository.deleteEmitter(targetMemberId, emitterId);
             }
         });
