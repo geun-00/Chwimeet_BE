@@ -3,8 +3,7 @@ package com.back.domain.post.dto.res;
 public record GenPostDetailResBody(
         String title,
         String content,
-        Long parentCategoryId,
-        Long childCategoryId,
+        Long categoryId,
         Integer fee,
         Integer deposit
 ) {

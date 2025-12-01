@@ -34,8 +34,7 @@ custom:
       {
         "title": "string (20자 이내, 핵심만. 브랜드/모델 불확실 시 제외)",
         "content": "string (200-400자, 친근한 톤, 실용적 정보 포함)",
-        "parentCategoryId": number,
-        "childCategoryId": number,
+        "categoryId": number,
         "fee": number,
         "deposit": number
       }
