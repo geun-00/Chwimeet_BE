@@ -1,22 +1,24 @@
 package com.back.domain.post.service;
 
-import com.back.domain.post.dto.res.PostListResBody;
-import com.back.domain.post.entity.Post;
-import com.back.domain.post.entity.PostImage;
-import com.back.domain.post.repository.PostFavoriteRepository;
-import com.back.domain.post.repository.PostRepository;
-import com.back.global.s3.S3Uploader;
-import lombok.RequiredArgsConstructor;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import com.back.domain.post.dto.res.PostListResBody;
+import com.back.domain.post.entity.Post;
+import com.back.domain.post.entity.PostImage;
+import com.back.domain.post.repository.PostFavoriteRepository;
+import com.back.domain.post.repository.PostRepository;
+import com.back.global.s3.S3Uploader;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -26,10 +28,13 @@ public class PostSearchService {
 	private final PostRepository postRepository;
 	private final PostFavoriteRepository postfavoriteRepository;
 	private final ChatClient chatClient;
-    private final S3Uploader s3;
+	private final S3Uploader s3;
 
 	@Value("${custom.ai.rag-llm-answer-prompt}")
-	private String ragPrompt;
+	private String answerPrompt;
+
+	@Value("${custom.ai.rag-llm-rerank-prompt}")
+	private String rerankPrompt;
 
 	@Transactional(readOnly = true)
 	public List<PostListResBody> searchPosts(String query, Long memberId) {
@@ -62,10 +67,10 @@ public class PostSearchService {
 					&& postfavoriteRepository.existsByMemberIdAndPostId(memberId, post.getId());
 
 				String thumbnail = post.getImages().stream()
-						.filter(PostImage::getIsPrimary)
-						.findFirst()
-						.map(img -> s3.generatePresignedUrl(img.getImageUrl()))
-						.orElse(null);
+					.filter(PostImage::getIsPrimary)
+					.findFirst()
+					.map(img -> s3.generatePresignedUrl(img.getImageUrl()))
+					.orElse(null);
 
 				return PostListResBody.of(post, isFavorite, thumbnail);
 			})
@@ -96,24 +101,11 @@ public class PostSearchService {
 			))
 			.collect(Collectors.joining("\n\n"));
 
-		String prompt = """
-			다음은 벡터 검색으로 찾은 후보 게시글들이야.
-			
-			%s
-			
-			사용자 질문: "%s"
-			
-			위 후보군 중 질문과 가장 관련 있는 게시글을 0~3개 골라줘.
-			관련도가 낮은 건 선택 안해도돼.
-			반드시 JSON 배열 형태로만 반환해줘.
-			예시: [21, 5] 또는 [] 또는 [20]
-			
-			설명은 절대 하지 마.
-			""".formatted(context, query);
+		String prompt = rerankPrompt.formatted(context, query);
 
 		String raw = chatClient.prompt(prompt)
 			.options(ChatOptions.builder()
-				.model("gpt-4o-mini")
+				.model("gpt-4.1-mini")
 				.temperature(1.0)
 				.build())
 			.call()
@@ -161,24 +153,14 @@ public class PostSearchService {
 			))
 			.collect(Collectors.joining("\n\n"));
 
-		String prompt = """
-			%s
-			
-			---------------------
-			[사용자 질문]
-			%s
-			
-			[추천된 게시글 정보]
-			%s
-			""".formatted(ragPrompt, query, context);
+		String prompt = answerPrompt.formatted(query, context);
 
 		return chatClient.prompt(prompt)
 			.options(ChatOptions.builder()
-				.model("gpt-4.1-mini")
+				.model("gpt-5.1")
 				.temperature(1.0)
 				.build())
 			.call()
 			.content();
 	}
-
 }
