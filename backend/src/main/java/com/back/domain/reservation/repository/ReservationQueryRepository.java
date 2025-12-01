@@ -270,14 +270,16 @@ public class ReservationQueryRepository extends CustomQuerydslRepositorySupport
     }
 
     public List<Reservation> findAllByEndAtAndStatus(LocalDate tomorrow, ReservationStatus reservationStatus) {
+        LocalDateTime start = tomorrow.atStartOfDay();
+        LocalDateTime end = tomorrow.plusDays(1).atStartOfDay();
+
         return selectFrom(reservation)
                 .leftJoin(reservation.post, post).fetchJoin()
                 .leftJoin(reservation.author, member).fetchJoin()
                 .where(
                         reservation.status.eq(reservationStatus),
-                        reservation.reservationEndAt.year().eq(tomorrow.getYear()),
-                        reservation.reservationEndAt.month().eq(tomorrow.getMonthValue()),
-                        reservation.reservationEndAt.dayOfMonth().eq(tomorrow.getDayOfMonth())
+                        reservation.reservationEndAt.goe(start),
+                        reservation.reservationEndAt.lt(end)
                 )
                 .fetch();
     }
