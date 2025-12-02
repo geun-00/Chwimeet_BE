@@ -119,11 +119,8 @@ public class ReservationQueryRepository extends CustomQuerydslRepositorySupport
                 // Function<JPAQueryFactory, JPAQuery<Reservation>> contentQuery
                 queryFactory -> queryFactory
                         .selectFrom(reservation)
-                        .distinct()
                         .leftJoin(reservation.post, post).fetchJoin()
                         .leftJoin(post.author, member).fetchJoin()
-                        .leftJoin(reservation.reservationOptions, reservationOption).fetchJoin()
-                        .leftJoin(reservationOption.postOption, postOption).fetchJoin()
                         .where(
                                 reservation.author.eq(author),
                                 statusEq(status),
@@ -152,9 +149,6 @@ public class ReservationQueryRepository extends CustomQuerydslRepositorySupport
                 // Function<JPAQueryFactory, JPAQuery<Reservation>> contentQuery
                 queryFactory -> queryFactory
                         .selectFrom(reservation)
-                        .distinct()
-                        .leftJoin(reservation.reservationOptions, reservationOption).fetchJoin()
-                        .leftJoin(reservationOption.postOption, postOption).fetchJoin()
                         .where(
                                 reservation.post.eq(post),
                                 statusEq(status)
