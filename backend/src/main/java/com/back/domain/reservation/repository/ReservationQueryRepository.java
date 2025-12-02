@@ -121,7 +121,6 @@ public class ReservationQueryRepository extends CustomQuerydslRepositorySupport
                         .selectFrom(reservation)
                         .leftJoin(reservation.post, post).fetchJoin()
                         .leftJoin(post.author, member).fetchJoin()
-                        .leftJoin(post.images, postImage)
                         .leftJoin(reservation.reservationOptions, reservationOption).fetchJoin()
                         .leftJoin(reservationOption.postOption, postOption).fetchJoin()
                         .where(
