@@ -156,7 +156,7 @@ public class PostController implements PostApi {
 		return ResponseEntity.ok(new RsData<>(HttpStatus.OK, HttpStatus.OK.name(), body));
 	}
 
-	@PostMapping("/genDetail")
+	@PostMapping("/gen-detail")
 	public ResponseEntity<RsData<GenPostDetailResBody>> genDetail(
 		@ValidateImages @RequestPart("images") List<MultipartFile> imageFiles,
 		@RequestPart(name = "additionalInfo", required = false) String additionalInfo) {
