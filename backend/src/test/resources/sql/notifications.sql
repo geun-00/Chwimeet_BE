@@ -5,4 +5,4 @@ VALUES
     (3, NOW(), NOW(), b'1', 3, 'RESERVATION_CLAIM_COMPLETED', 1),
     (4, NOW(), NOW(), b'0', 1, 'REVIEW_CREATED', 1),
     (5, NOW(), NOW(), b'0', 2, 'REVIEW_CREATED', 1),
-    (6, NOW(), NOW(), b'0', 3, 'REVIEW_CREATED', 1),
+    (6, NOW(), NOW(), b'0', 3, 'REVIEW_CREATED', 1);
