@@ -14,8 +14,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ActiveProfiles("test")
 @SpringBootTest
@@ -43,5 +42,18 @@ class NotificationControllerTest {
         mockMvc.perform(get("/api/v1/notifications/subscribe"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM));
+    }
+
+    @Test
+    @DisplayName("알림 목록 조회 - 성공")
+    @WithUserDetails(value = "user1@example.com")
+    void readNotifications_shouldReturnNotificationList() throws Exception {
+        mockMvc.perform(get("/api/v1/notifications")
+                        .param("page", "0")
+                        .param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.msg").value("알림 목록 조회"))
+                .andExpect(jsonPath("$.data.content").isArray());
     }
 }
