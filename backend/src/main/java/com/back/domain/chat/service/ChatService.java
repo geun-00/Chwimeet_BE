@@ -157,27 +157,17 @@ public class ChatService {
     @Transactional
     public void saveMessage(Long chatRoomId, SendChatMessageDto body, Long memberId) {
 
-        ChatMember chatMember = chatRoomQueryRepository.findChatMember(chatRoomId, memberId)
+        ChatMessagePrepareDto prepareInfo = chatRoomQueryRepository.getChatMessagePrepareInfo(chatRoomId, memberId)
                 .orElseThrow(() -> new ServiceException(HttpStatus.FORBIDDEN, "채팅방이 존재하지 않거나 접근 권한이 없습니다."));
 
-        ChatMessage chatMessage = ChatMessage.create(body.content(), chatRoomId, chatMember.getId());
+        ChatMessage chatMessage = ChatMessage.create(body.content(), chatRoomId, prepareInfo.chatMemberId());
         chatMessageRepository.save(chatMessage);
 
-        Long otherMemberId = chatRoomQueryRepository.findOtherMemberId(chatRoomId, memberId)
-                .orElseThrow(() -> new ServiceException(HttpStatus.NOT_FOUND, "채팅 상대를 찾을 수 없습니다."));
+        redisTemplate.opsForValue().increment(unreadKey(prepareInfo.otherMemberId(), chatRoomId));
 
-        redisTemplate.opsForValue().increment(unreadKey(otherMemberId, chatRoomId));
+        chatRoomQueryRepository.updateLastMessage(chatRoomId, chatMessage.getContent(), chatMessage.getCreatedAt());
 
-        updateChatRoomLastMessage(chatRoomId, chatMessage);
-
-        publishMessageAndNotification(chatRoomId, memberId, otherMemberId, chatMessage);
-    }
-
-    private void updateChatRoomLastMessage(Long chatRoomId, ChatMessage chatMessage) {
-        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
-                .orElseThrow(() -> new ServiceException(HttpStatus.NOT_FOUND, "존재하지 않는 채팅방입니다."));
-
-        chatRoom.updateLastMessage(chatMessage.getContent(), chatMessage.getCreatedAt());
+        publishMessageAndNotification(chatRoomId, memberId, prepareInfo.otherMemberId(), chatMessage);
     }
 
     private void publishMessageAndNotification(Long chatRoomId, Long senderId, Long receiverId, ChatMessage chatMessage) {

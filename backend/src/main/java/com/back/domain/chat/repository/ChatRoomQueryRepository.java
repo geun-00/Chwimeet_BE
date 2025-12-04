@@ -1,5 +1,6 @@
 package com.back.domain.chat.repository;
 
+import com.back.domain.chat.dto.ChatMessagePrepareDto;
 import com.back.domain.chat.dto.ChatPostDto;
 import com.back.domain.chat.dto.ChatRoomListDto;
 import com.back.domain.chat.dto.OtherMemberDto;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -148,5 +150,37 @@ public class ChatRoomQueryRepository extends CustomQuerydslRepositorySupport {
                 .fetchOne();
 
         return Optional.ofNullable(otherMember);
+    }
+
+    public Optional<ChatMessagePrepareDto> getChatMessagePrepareInfo(Long chatRoomId, Long memberId) {
+        QChatMember me = new QChatMember("me");
+        QChatMember other = new QChatMember("other");
+
+        ChatMessagePrepareDto result = select(
+                Projections.constructor(ChatMessagePrepareDto.class,
+                        me.id,
+                        other.memberId,
+                        chatRoom.lastMessage
+                ))
+                .from(me)
+                .join(chatRoom).on(me.chatRoomId.eq(chatRoom.id))
+                .join(other).on(other.chatRoomId.eq(chatRoom.id))
+                .where(
+                        me.chatRoomId.eq(chatRoomId),
+                        me.memberId.eq(memberId),
+                        other.memberId.ne(memberId)
+                )
+                .fetchOne();
+
+        return Optional.ofNullable(result);
+    }
+
+    public void updateLastMessage(Long chatRoomId, String lastMessage, LocalDateTime lastMessageTime) {
+        long affectedRows = getQueryFactory()
+                .update(chatRoom)
+                .set(chatRoom.lastMessage, lastMessage)
+                .set(chatRoom.lastMessageTime, lastMessageTime)
+                .where(chatRoom.id.eq(chatRoomId))
+                .execute();
     }
 }
