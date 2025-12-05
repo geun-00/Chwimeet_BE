@@ -91,4 +91,29 @@ class PostControllerTest {
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.data").value(false));
 	}
+
+	@Test
+	@DisplayName("게시글 즐겨찾기 조회 테스트")
+	@WithUserDetails("user1@example.com")
+	void getFavoritePosts_success() throws Exception {
+
+		mockMvc.perform(post("/api/v1/posts/favorites/{id}", 4L))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data").value(true));
+
+		mockMvc.perform(post("/api/v1/posts/favorites/{id}", 5L))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data").value(true));
+
+		mockMvc.perform(post("/api/v1/posts/favorites/{id}", 6L))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data").value(true));
+
+		mockMvc.perform(get("/api/v1/posts/favorites"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.msg").value("성공"))
+			.andExpect(jsonPath("$.data.content").isArray())
+			.andExpect(jsonPath("$.data.content.length()").value(3));
+	}
+	
 }
