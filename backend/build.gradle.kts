@@ -1,4 +1,6 @@
-import org.jooq.meta.jaxb.*
+import org.jooq.meta.jaxb.ForcedType
+import org.jooq.meta.jaxb.Generate
+
 val jooqVersion = "3.20.5"
 ext["jooq.version"] = jooqVersion
 
@@ -46,8 +48,7 @@ dependencies {
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     annotationProcessor("org.projectlombok:lombok")
     implementation("org.mariadb.jdbc:mariadb-java-client:3.5.1")
-    runtimeOnly("com.h2database:h2")
-    
+
     implementation("org.springframework.boot:spring-boot-starter-actuator")
 
     // JOOQ
@@ -76,9 +77,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-websocket")
     // QueryDSL
     implementation("com.querydsl:querydsl-jpa:5.0.0:jakarta")
-    annotationProcessor ("com.querydsl:querydsl-apt:5.0.0:jakarta")
-    annotationProcessor ("jakarta.annotation:jakarta.annotation-api")
-    annotationProcessor ("jakarta.persistence:jakarta.persistence-api:3.1.0")
+    annotationProcessor("com.querydsl:querydsl-apt:5.0.0:jakarta")
+    annotationProcessor("jakarta.annotation:jakarta.annotation-api")
+    annotationProcessor("jakarta.persistence:jakarta.persistence-api:3.1.0")
     // 이미지 리사이징
     implementation("net.coobird:thumbnailator:0.4.20")
 
