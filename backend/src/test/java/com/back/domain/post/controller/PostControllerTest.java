@@ -122,4 +122,13 @@ class PostControllerTest {
 			.andExpect(jsonPath("$.data.content.length()").value(3));
 	}
 
+	@Test
+	@DisplayName("게시글 삭제 테스트")
+	@WithUserDetails("user1@example.com")
+	void deletePost_success() throws Exception {
+
+		mockMvc.perform(delete("/api/v1/posts/{id}", 1L))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.msg").value("게시글이 삭제되었습니다."));
+	}
 }
