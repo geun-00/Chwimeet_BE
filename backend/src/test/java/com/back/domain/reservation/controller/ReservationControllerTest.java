@@ -1,6 +1,10 @@
 package com.back.domain.reservation.controller;
 
 import com.back.BaseContainerIntegrationTest;
+import com.back.domain.reservation.common.ReservationDeliveryMethod;
+import com.back.domain.reservation.common.ReservationStatus;
+import com.back.domain.reservation.dto.UpdateReservationReqBody;
+import com.back.domain.reservation.dto.UpdateReservationStatusReqBody;
 import com.back.domain.reservation.repository.ReservationRepository;
 
 import org.junit.jupiter.api.DisplayName;
@@ -16,8 +20,7 @@ import java.time.format.DateTimeFormatter;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.*;
 
 @Sql({
         "/sql/categories.sql",
@@ -80,7 +83,7 @@ class ReservationControllerTest extends BaseContainerIntegrationTest {
 
     @Test
     @WithUserDetails("user1@example.com")
-    @DisplayName("사용자가 보낸 예약 목록 조회 테스트")
+    @DisplayName("게스트가 보낸 예약 목록 조회 테스트")
     void getSentReservationsTest() throws Exception {
         // 멤버1은 reservation ID: 1,2,3 을 가지고 있음
         mockMvc.perform(get("/api/v1/reservations/sent")
@@ -96,6 +99,131 @@ class ReservationControllerTest extends BaseContainerIntegrationTest {
                         jsonPath("$.data.page.size").isNumber(),
                         jsonPath("$.data.page.totalElements").isNumber(),
                         jsonPath("$.data.page.totalPages").isNumber()
+                );
+    }
+
+    @Test
+    @WithUserDetails("user1@example.com") // 예약 목록을 보낸 게스트 사용자
+    @DisplayName("게스트의 예약 상태별 개수 조회 테스트")
+    void getSentReservationStatusCountsTest() throws Exception {
+        mockMvc.perform(get("/api/v1/reservations/sent/status"))
+                .andExpectAll(
+                        status().isOk(),
+                        jsonPath("$.status").value(is(200)),
+                        jsonPath("$.msg").value(containsString("게스트의 예약 상태별 개수입니다")),
+                        jsonPath("$.data").exists(),
+                        jsonPath("$.data.totalCount").value(is(2)),
+                        jsonPath("$.data.statusCounts").exists()
+                );
+    }
+
+    @Test
+    @WithUserDetails("user1@example.com") // DB 상의 1번 게시글(postId=1)의 작성자(author_id)의 이메일로 설정
+    @DisplayName("호스트가 자신의 게시글에 대한 예약 목록 조회 테스트")
+    void getReceivedReservationsTest_Success() throws Exception {
+        Long postId = 1L; // 1번 게시글에 대한 예약 목록 조회
+
+        mockMvc.perform(get("/api/v1/reservations/received/{postId}", postId)
+                        .param("page", "0")
+                        .param("size", "5"))
+                .andExpectAll(
+                        status().isOk(),
+                        jsonPath("$.status").value(200),
+                        jsonPath("$.msg").value("%d번 게시글에 대한 예약 목록입니다.".formatted(postId)),
+                        jsonPath("$.data").exists(),
+                        jsonPath("$.data.content").isArray(),
+                        jsonPath("$.data.content", org.hamcrest.Matchers.hasSize(greaterThanOrEqualTo(0))),
+                        jsonPath("$.data.page").exists(),
+                        jsonPath("$.data.page.size").isNumber(),
+                        jsonPath("$.data.page.totalElements").isNumber(),
+                        jsonPath("$.data.page.totalPages").isNumber()
+                );
+    }
+
+    @Test
+    @WithUserDetails("user2@example.com") // 1번 예약의 게스트(author_id=2)
+    @DisplayName("게스트의 예약 상세 정보 조회 테스트")
+    void getReservationDetailTest_GuestAccessSuccess() throws Exception {
+        Long reservationId = 1L;
+
+        mockMvc.perform(get("/api/v1/reservations/{id}", reservationId))
+                .andExpectAll(
+                        // 1. HTTP 상태 코드 검증
+                        status().isOk(),
+                        jsonPath("$.status").value(200),
+                        jsonPath("$.msg").value("%d번 예약 상세 정보입니다.".formatted(reservationId)),
+                        jsonPath("$.data.id").value(is(reservationId.intValue())),
+                        jsonPath("$.data.status").value("CANCELLED"),
+                        jsonPath("$.data.author.nickname").value("테스트2"),
+                        jsonPath("$.data.logs").isArray(),
+                        jsonPath("$.data.totalAmount").isNumber()
+                );
+    }
+
+    @Test
+    @WithUserDetails("user2@example.com") // 7번 예약의 게스트(author_id=2)
+    @DisplayName("예약 당사자의 예약 수정 테스트 (PENDING_APPROVAL 상태, 성공)")
+    void updateReservationTest_Success() throws Exception {
+        Long reservationId = 7L;
+
+        // 1. 수정할 요청 본문(Request Body) 객체 생성
+        UpdateReservationReqBody reqBody = UpdateReservationReqBody.of(
+                ReservationDeliveryMethod.DIRECT,
+                null,
+                null,
+                ReservationDeliveryMethod.DIRECT,
+                null,
+                LocalDateTime.now().plusDays(60),
+                LocalDateTime.now().plusDays(61)
+        );
+        String content = objectMapper.writeValueAsString(reqBody);
+
+        mockMvc.perform(put("/api/v1/reservations/{id}", reservationId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(content))
+                .andExpectAll(
+                        status().isOk(),
+                        jsonPath("$.status").value(is(200)),
+                        jsonPath("$.msg").value(is("%d번 예약이 수정되었습니다.".formatted(reservationId))),
+                        jsonPath("$.data.id").value(is(reservationId.intValue())),
+                        jsonPath("$.data.receiveMethod").value(is("DELIVERY")),
+                        jsonPath("$.data.receiveAddress1").value(is("수정된 주소 1")),
+                        jsonPath("$.data.totalAmount").value(is(500))
+                );
+    }
+
+    @Test
+    @WithUserDetails("user2@example.com") // 7번 예약의 게스트 (취소 요청 권한 보유자)
+    @DisplayName("게스트의 예약 상태 업데이트 테스트 (PENDING_APPROVAL -> CANCELLED, 성공)")
+    void updateReservationStatusTest_Cancel_Success() throws Exception {
+        Long reservationId = 7L;
+
+        // 1. 상태 변경 요청 본문 생성
+        UpdateReservationStatusReqBody requestBody  = new UpdateReservationStatusReqBody(
+                ReservationStatus.CANCELLED,
+                "취소 사유",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+        String content = objectMapper.writeValueAsString(requestBody);
+
+
+        mockMvc.perform(put("/api/v1/reservations/{id}/status", reservationId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(content))
+                .andExpectAll(
+                        status().isOk(),
+                        jsonPath("$.status").value(is(200)),
+                        jsonPath("$.msg").value(is("%d번 예약 상태가 업데이트 되었습니다.".formatted(reservationId))),
+                        jsonPath("$.data.id").value(is(reservationId.intValue())),
+                        jsonPath("$.data.status").value(is("CANCELLED")),
+                        jsonPath("$.data.cancelReason").value(is("취소 사유")),
+                        jsonPath("$.data.receiveCarrier").value(nullValue()),
+                        jsonPath("$.data.rejectReason").value(nullValue())
                 );
     }
 }
