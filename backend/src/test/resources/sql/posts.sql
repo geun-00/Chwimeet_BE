@@ -1,5 +1,12 @@
-INSERT INTO post (id, created_at, modified_at, content, deposit, fee, is_banned, receive_method,
-                  return_address1, return_address2, return_method, title, author_id, category_id,
+SET
+FOREIGN_KEY_CHECKS = 0;
+TRUNCATE TABLE post;
+SET
+FOREIGN_KEY_CHECKS = 1;
+
+INSERT INTO post (id, created_at, modified_at, content, deposit, fee,
+                  is_banned, receive_method, return_address1, return_address2,
+                  return_method, title, author_id, category_id,
                   embedding_status, embedding_version)
 VALUES
     -- 멤버 1이 작성한 3개의 포스트
@@ -21,3 +28,10 @@ VALUES
 
     (6, NOW(), NOW(), '스마트폰/태블릿 대여', 30000, 7000, b'0', 'DELIVERY',
      '경기도 성남시', '분당동', 'DELIVERY', '태블릿 빌려요', 2, 9, 'PENDING', 1);
+
+
+SET
+FOREIGN_KEY_CHECKS = 0;
+TRUNCATE TABLE post_region;
+SET
+FOREIGN_KEY_CHECKS = 1;

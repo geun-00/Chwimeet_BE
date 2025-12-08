@@ -1,15 +1,23 @@
 SET
 FOREIGN_KEY_CHECKS = 0;
+
 TRUNCATE TABLE category;
 TRUNCATE TABLE member;
 TRUNCATE TABLE notification;
+
 TRUNCATE TABLE post;
 TRUNCATE TABLE post_favorite;
 TRUNCATE TABLE post_option;
 TRUNCATE TABLE post_image;
 TRUNCATE TABLE post_region;
+
 TRUNCATE TABLE region;
 TRUNCATE TABLE reservation;
 TRUNCATE TABLE review;
+
+TRUNCATE TABLE chat_room;
+TRUNCATE TABLE chat_member;
+TRUNCATE TABLE chat_message;
+
 SET
 FOREIGN_KEY_CHECKS = 1;
