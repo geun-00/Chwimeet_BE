@@ -3,7 +3,7 @@ package com.back.global.s3;
 public enum S3FolderType {
     MEMBER_PROFILE_ORIGINAL("members/profile/originals/", false),
     MEMBER_PROFILE_THUMBNAIL("members/profile/resized/thumbnail/", true),
-    POST_IMAGE("posts/", false);
+    POST_IMAGE("posts/images/", false);
 
     private final String path;
     private final boolean deletable;
