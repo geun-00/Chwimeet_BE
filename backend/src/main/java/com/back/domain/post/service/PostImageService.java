@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.back.domain.post.dto.req.PostImageReqBody;
+import com.back.domain.post.dto.res.PostImageResBody;
 import com.back.domain.post.entity.Post;
 import com.back.domain.post.entity.PostImage;
 import com.back.global.exception.ServiceException;
@@ -59,6 +60,7 @@ public class PostImageService {
 
 		for (PostImageReqBody req : reqBodies) {
 			if (req.id() != null) {
+
 				PostImage existing = post.getImages()
 					.stream()
 					.filter(img -> img.getId().equals(req.id()))
@@ -67,7 +69,9 @@ public class PostImageService {
 						"존재하지 않는 이미지입니다: " + req.id()));
 
 				result.add(new PostImage(post, existing.getImageUrl(), req.isPrimary()));
+
 			} else {
+
 				if (files == null || fileIndex >= files.size()) {
 					throw new ServiceException(HttpStatus.BAD_REQUEST, "이미지 정보와 파일 개수가 일치하지 않습니다.");
 				}
@@ -91,5 +95,25 @@ public class PostImageService {
 				s3.delete(img.getImageUrl());
 			}
 		});
+	}
+
+	public String toPresignedUrl(String url) {
+		if (url == null)
+			return null;
+		return s3.generatePresignedUrl(url);
+	}
+
+	public List<PostImageResBody> toImageResBodies(List<PostImage> images) {
+		return images.stream()
+			.map(img -> PostImageResBody.of(img, toPresignedUrl(img.getImageUrl())))
+			.toList();
+	}
+
+	public String toThumbnailUrl(Post post) {
+		return post.getImages().stream()
+			.filter(PostImage::getIsPrimary)
+			.findFirst()
+			.map(img -> toPresignedUrl(img.getImageUrl()))
+			.orElse(null);
 	}
 }
