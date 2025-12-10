@@ -1,7 +1,10 @@
 package com.back.domain.post.controller;
 
-import com.back.config.TestConfig;
-import com.back.global.s3.S3Uploader;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,13 +20,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import com.back.config.TestConfig;
+import com.back.global.s3.S3Uploader;
 
 @ActiveProfiles("test")
 @SpringBootTest
@@ -49,13 +47,27 @@ class PostControllerTest {
 
 	@BeforeEach
 	void setup() {
-		when(s3Uploader.upload(any(), any()))
-			.thenReturn("https://bucket.s3.ap-northeast-2.amazonaws.com/post/test.jpg");
 
-		doNothing().when(s3Uploader).delete(anyString());
+		when(s3Uploader.uploadPostOriginal(any()))
+			.thenReturn("https://cloudfront.net/posts/originals/test.jpg");
+
+		when(s3Uploader.getPostThumbnailUrl(anyString()))
+			.thenReturn("https://cloudfront.net/posts/thumbnail/test.jpg");
+
+		when(s3Uploader.getPostDetailUrl(anyString()))
+			.thenReturn("https://cloudfront.net/posts/detail/test.jpg");
+
+		when(s3Uploader.getProfileThumbnailUrl(anyString()))
+			.thenReturn("https://cloudfront.net/members/profile/thumbnail/test.jpg");
 
 		when(s3Uploader.generatePresignedUrl(anyString()))
-			.thenReturn("https://bucket.fake-url.com/presigned");
+			.thenReturn("https://s3.example.com/test.jpg");
+
+		when(s3Uploader.generatePresignedUrl(null))
+			.thenReturn(null);
+
+		// 4) 삭제용
+		doNothing().when(s3Uploader).deletePostImages(anyString());
 	}
 
 	@Test
