@@ -38,27 +38,7 @@ public class S3Uploader {
 		this.s3 = s3;
 		this.s3Presigner = s3Presigner;
 	}
-
-	public String upload(MultipartFile image, S3FolderType folderType) {
-		try {
-			String filename = UUID.randomUUID() + "-" + image.getOriginalFilename();
-			String key = folderType.getPath() + filename;
-
-			PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-				.bucket(bucket)
-				.key(key)
-				.contentType(image.getContentType())
-				.build();
-
-			s3.putObject(putObjectRequest, RequestBody.fromBytes(image.getBytes()));
-
-			return "https://" + cloudfrontDomain + "/" + key;
-
-		} catch (IOException e) {
-			throw new ServiceException(HttpStatus.INTERNAL_SERVER_ERROR, "이미지 업로드 실패");
-		}
-	}
-
+	
 	public void delete(String imageUrl) {
 		try {
 			String key = extractKey(imageUrl);
