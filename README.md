@@ -265,6 +265,14 @@ Spring AI는 다양한 AI 모델과 벡터 DB를 추상화된 인터페이스로
 
 <img src="https://img.shields.io/badge/Quartz-3E4348?style=for-the-badge&logoColor=white" />
 
+프로젝트에서는 게시글 임베딩, 예약 상태 자동 변경, 오래된 알림 삭제 등
+주기적으로 처리해야 하는 작업들이 필요했습니다.
+
+Spring의 `@Scheduled`로도 가능했지만, Blue/Green 배포 시 배치 작업이 중복 실행될 위험과
+작업 이력 관리의 어려움 때문에 Quartz를 선택했습니다.
+
+Quartz는 데이터베이스 기반 분산 락으로 여러 인스턴스 환경에서도
+배치 작업이 한 번만 실행되도록 보장하며, 작업 실행 이력을 자동으로 기록합니다.
 
 <br>
 
@@ -338,7 +346,7 @@ public void publish(Long chatRoomId, ChatMessageDto dto) {
 </details>
 
 <details>
-<summary><strong>📝 Quartz 기반 배치</strong></summary>
+<summary><strong>📝 Quartz 기반 배치 기능 구현</strong></summary>
 
 ### 도입 배경
 주요 MVP 기능들을 개발하며 주기적으로 자동 처리해야 하는 작업들이 요구되었습니다.
@@ -348,10 +356,6 @@ public void publish(Long chatRoomId, ChatMessageDto dto) {
 - **예약 상태 자동 변경**: 청구진행 → 청구완료, 환급예정 → 환급완료 등 시간 기반 상태 전환
 - **오래된 알림 삭제**: 7일 이상 확인하지 않은 알림을 자동으로 정리하여 DB 부담 감소
 - **신고 누적 자동 제재**: 일정 기준 이상 신고가 누적된 사용자를 자동으로 제재
-
-이러한 작업들을 Spring의 `@Scheduled`로도 구현할 수 있지만,  
-**무중단 배포 환경에서 배치 작업이 중복 실행될 위험**과  
-**작업 실행 이력을 추적하고 관리하기 어려운 문제** 때문에 `Quartz`를 도입했습니다.
 
 ---
 
