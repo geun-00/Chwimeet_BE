@@ -461,6 +461,8 @@ for (Notification notification : notifications) {
 
 ```
 
+---
+
 - Batch 조회 시 DTO로 직접 조회하지 않고 Entity를 로딩한 뒤 Mapper에서 응답 DTO로 변환
 - 알림 타입별 응답 구조 변경 시 쿼리 수정 없이 Mapper만 변경 가능
 
