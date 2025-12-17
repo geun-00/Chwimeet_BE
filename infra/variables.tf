@@ -17,3 +17,8 @@ variable "app_1_domain" {
   description = "app_1 domain"
   default     = "api.chwimeet.store"
 }
+
+variable "key_name" {
+  description = "EC2 Key Pair name"
+  default     = "team1_key" // 사용할 키페어 이름
+}

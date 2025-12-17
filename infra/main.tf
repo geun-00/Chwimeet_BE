@@ -21,7 +21,7 @@ resource "aws_vpc" "vpc-team1" {
   enable_dns_hostnames = true
 
   tags = {
-    Name = "${var.prefix}-vpc" // team1-vpc
+    Name = "${var.prefix}-vpc" // ${var.prefix}-vpc
     Team = var.team_tag_value
   }
 }
@@ -34,7 +34,7 @@ resource "aws_subnet" "subnet-team1-a" {
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "${var.prefix}-subnet-a" // team1-subnet-a
+    Name = "${var.prefix}-subnet-a" // ${var.prefix}-subnet-a
     Team = var.team_tag_value
   }
 }
@@ -47,7 +47,7 @@ resource "aws_subnet" "subnet-team1-b" {
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "${var.prefix}-subnet-b" // team1-subnet-b
+    Name = "${var.prefix}-subnet-b" // ${var.prefix}-subnet-b
     Team = var.team_tag_value
   }
 }
@@ -56,7 +56,7 @@ resource "aws_internet_gateway" "igw-team1" {
   vpc_id = aws_vpc.vpc-team1.id
 
   tags = {
-    Name = "${var.prefix}-igw" // team1-igw
+    Name = "${var.prefix}-igw" // ${var.prefix}-igw
     Team = var.team_tag_value
   }
 }
@@ -70,7 +70,7 @@ resource "aws_route_table" "rt-team1" {
   }
 
   tags = {
-    Name = "${var.prefix}-rt" // team1-rt
+    Name = "${var.prefix}-rt" // ${var.prefix}-rt
     Team = var.team_tag_value
   }
 }
@@ -86,7 +86,7 @@ resource "aws_route_table_association" "assoc-b" {
 }
 
 resource "aws_security_group" "sg-team1" {
-  name = "${var.prefix}-sg" // team1-sg
+  name = "${var.prefix}-sg" // ${var.prefix}-sg
 
   // 인바운드: 모든 IP (0.0.0.0/0)에서 모든 포트 허용 (보안 강화를 위해 최소 포트만 허용하도록 변경 권장)
   ingress {
@@ -107,14 +107,14 @@ resource "aws_security_group" "sg-team1" {
   vpc_id = aws_vpc.vpc-team1.id
 
   tags = {
-    Name = "${var.prefix}-sg" // team1-sg
+    Name = "${var.prefix}-sg" // ${var.prefix}-sg
     Team = var.team_tag_value
   }
 }
 
 # --- 2. IAM (EC2 Role for SSM & S3) ---
 resource "aws_iam_role" "ec2-role-team1" {
-  name = "${var.prefix}-ec2-role" // team1-ec2-role
+  name = "${var.prefix}-ec2-role" // ${var.prefix}-ec2-role
 
   // EC2 서비스가 이 역할을 가정할 수 있도록 설정
   assume_role_policy = <<EOF
@@ -153,7 +153,7 @@ resource "aws_iam_role_policy_attachment" "s3-full-access" {
 
 // IAM 인스턴스 프로파일 생성
 resource "aws_iam_instance_profile" "instance-profile-team1" {
-  name = "${var.prefix}-instance-profile" // team1-instance-profile
+  name = "${var.prefix}-instance-profile" // ${var.prefix}-instance-profile
   role = aws_iam_role.ec2-role-team1.name
 
   tags = {
@@ -260,7 +260,7 @@ echo "MariaDB가 준비됨."
 
 # Prometheus 설정 파일 생성
 mkdir -p /dockerProjects/prometheus_1/volumes/etc/prometheus
-cat > /dockerProjects/prometheus_1/volumes/etc/prometheus/prometheus.yml <<'PROM_EOF'
+cat > /dockerProjects/prometheus_1/volumes/etc/prometheus/prometheus.yml <<PROM_EOF
 global:
   scrape_interval: 15s
   evaluation_interval: 15s
@@ -274,11 +274,11 @@ scrape_configs:
     metrics_path: '/actuator/prometheus'
     scrape_interval: 5s
     static_configs:
-      - targets: [ "team1-app-001:8080" ]
+      - targets: [ "${var.prefix}-app-001:8080" ]
         labels:
           env: "blue"
 
-      - targets: [ "team1-app-002:8080" ]
+      - targets: [ "${var.prefix}-app-002:8080" ]
         labels:
           env: "green"
 PROM_EOF
@@ -316,8 +316,14 @@ docker login ghcr.io -u ${var.github_access_token_1_owner} --password-stdin
 mkdir -p /home/ec2-user/app
 cd /home/ec2-user/app
 
+# 로그 디렉토리 생성 및 권한 설정
+mkdir -p /dockerProjects/${var.prefix}-app-001/logs
+mkdir -p /dockerProjects/${var.prefix}-app-002/logs
+chmod -R 777 /dockerProjects/${var.prefix}-app-001/logs
+chmod -R 777 /dockerProjects/${var.prefix}-app-002/logs
+
 # .env 파일 생성 - 통일된 환경변수 이름 사용
-cat > .env <<'ENV_EOF'
+cat > .env <<ENV_EOF
 SPRING__DATASOURCE__URL=jdbc:mariadb://mariadb_1:3306/${var.app_1_db_name}?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
 SPRING__DATASOURCE__USERNAME=root
 SPRING__DATASOURCE__PASSWORD=${var.password_1}
@@ -338,42 +344,26 @@ SPRING__SECURITY__OAUTH2__CLIENT__REGISTRATION__KAKAO__CLIENT_SECRET=${var.kakao
 SPRING__SECURITY__OAUTH2__CLIENT__REGISTRATION__KAKAO__REDIRECT_URI=${var.kakao_redirect_uri}
 ENV_EOF
 
-# docker-compose.yml 생성 (컨테이너 이름은 team1-app-001/002 유지)
-cat > docker-compose.yml <<'COMPOSE_EOF'
+# docker-compose.yml 생성 (컨테이너 이름은 ${var.prefix}-app-001/002 유지)
+cat > docker-compose.yml <<COMPOSE_EOF
 version: '3.8'
 
 services:
-  team1-app-001:
+  ${var.prefix}-app-001:
     image: ghcr.io/${var.github_access_token_1_owner}/chwimeet-backend:latest
-    container_name: team1-app-001
+    container_name: ${var.prefix}-app-001
     restart: unless-stopped
     networks:
       - common
     ports:
       - "8080:8080"
     volumes:
-      - /dockerProjects/team1-app-001/logs:/app/logs
+      - /dockerProjects/${var.prefix}-app-001/logs:/app/logs
+    env_file:
+      - .env
     environment:
       - TZ=Asia/Seoul
       - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_DATASOURCE_URL=$${SPRING__DATASOURCE__URL}
-      - SPRING_DATASOURCE_USERNAME=$${SPRING__DATASOURCE__USERNAME}
-      - SPRING_DATASOURCE_PASSWORD=$${SPRING__DATASOURCE__PASSWORD}
-      - SPRING_DATA_REDIS_HOST=$${SPRING__REDIS__HOST}
-      - SPRING_DATA_REDIS_PORT=$${SPRING__REDIS__PORT}
-      - SPRING_DATA_REDIS_PASSWORD=$${SPRING__REDIS__PASSWORD}
-      - CUSTOM__JWT__SECRET_KEY=$${CUSTOM__JWT__SECRET_KEY}
-      - CUSTOM__CORS__ALLOWED__ORIGINS=$${CUSTOM__CORS__ALLOWED__ORIGINS}
-      - SPRING__AI__OPENAI__API_KEY=$${SPRING__AI__OPENAI__API_KEY}
-      - CLOUD__AWS__S3__BUCKET=$${CLOUD__AWS__S3__BUCKET}
-      - CLOUD__AWS__CLOUDFRONT__DOMAIN=$${CLOUD__AWS__CLOUDFRONT__DOMAIN}
-      - SPRING__MAIL__HOST=$${SPRING__MAIL__HOST}
-      - SPRING__MAIL__PORT=$${SPRING__MAIL__PORT}
-      - SPRING__MAIL__USERNAME=$${SPRING__MAIL__USERNAME}
-      - SPRING__MAIL__PASSWORD=$${SPRING__MAIL__PASSWORD}
-      - SPRING__SECURITY__OAUTH2__CLIENT__REGISTRATION__KAKAO__CLIENT_ID=$${SPRING__SECURITY__OAUTH2__CLIENT__REGISTRATION__KAKAO__CLIENT_ID}
-      - SPRING__SECURITY__OAUTH2__CLIENT__REGISTRATION__KAKAO__CLIENT_SECRET=$${SPRING__SECURITY__OAUTH2__CLIENT__REGISTRATION__KAKAO__CLIENT_SECRET}
-      - SPRING__SECURITY__OAUTH2__CLIENT__REGISTRATION__KAKAO__REDIRECT_URI=$${SPRING__SECURITY__OAUTH2__CLIENT__REGISTRATION__KAKAO__REDIRECT_URI}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 30s
@@ -381,37 +371,21 @@ services:
       retries: 3
       start_period: 60s
 
-  team1-app-002:
+  ${var.prefix}-app-002:
     image: ghcr.io/${var.github_access_token_1_owner}/chwimeet-backend:latest
-    container_name: team1-app-002
+    container_name: ${var.prefix}-app-002
     restart: unless-stopped
     networks:
       - common
     ports:
       - "8081:8080"
     volumes:
-      - /dockerProjects/team1-app-002/logs:/app/logs
+      - /dockerProjects/${var.prefix}-app-002/logs:/app/logs
+    env_file:
+      - .env
     environment:
       - TZ=Asia/Seoul
       - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_DATASOURCE_URL=$${SPRING__DATASOURCE__URL}
-      - SPRING_DATASOURCE_USERNAME=$${SPRING__DATASOURCE__USERNAME}
-      - SPRING_DATASOURCE_PASSWORD=$${SPRING__DATASOURCE__PASSWORD}
-      - SPRING_DATA_REDIS_HOST=$${SPRING__REDIS__HOST}
-      - SPRING_DATA_REDIS_PORT=$${SPRING__REDIS__PORT}
-      - SPRING_DATA_REDIS_PASSWORD=$${SPRING__REDIS__PASSWORD}
-      - CUSTOM__JWT__SECRET_KEY=$${CUSTOM__JWT__SECRET_KEY}
-      - CUSTOM__CORS__ALLOWED__ORIGINS=$${CUSTOM__CORS__ALLOWED__ORIGINS}
-      - SPRING__AI__OPENAI__API_KEY=$${SPRING__AI__OPENAI__API_KEY}
-      - CLOUD__AWS__S3__BUCKET=$${CLOUD__AWS__S3__BUCKET}
-      - CLOUD__AWS__CLOUDFRONT__DOMAIN=$${CLOUD__AWS__CLOUDFRONT__DOMAIN}
-      - SPRING__MAIL__HOST=$${SPRING__MAIL__HOST}
-      - SPRING__MAIL__PORT=$${SPRING__MAIL__PORT}
-      - SPRING__MAIL__USERNAME=$${SPRING__MAIL__USERNAME}
-      - SPRING__MAIL__PASSWORD=$${SPRING__MAIL__PASSWORD}
-      - SPRING__SECURITY__OAUTH2__CLIENT__REGISTRATION__KAKAO__CLIENT_ID=$${SPRING__SECURITY__OAUTH2__CLIENT__REGISTRATION__KAKAO__CLIENT_ID}
-      - SPRING__SECURITY__OAUTH2__CLIENT__REGISTRATION__KAKAO__CLIENT_SECRET=$${SPRING__SECURITY__OAUTH2__CLIENT__REGISTRATION__KAKAO__CLIENT_SECRET}
-      - SPRING__SECURITY__OAUTH2__CLIENT__REGISTRATION__KAKAO__REDIRECT_URI=$${SPRING__SECURITY__OAUTH2__CLIENT__REGISTRATION__KAKAO__REDIRECT_URI}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 30s
@@ -427,7 +401,7 @@ networks:
 COMPOSE_EOF
 
 # 무중단 배포 스크립트 생성 (deploy.sh) - 완전 자동화 버전
-cat > /home/ec2-user/app/deploy.sh <<'DEPLOY_EOF'
+cat > /home/ec2-user/app/deploy.sh <<DEPLOY_EOF
 #!/bin/bash
 set -e
 
@@ -447,14 +421,14 @@ docker rmi ghcr.io/$GITHUB_ACCESS_TOKEN_1_OWNER/chwimeet-backend:latest || true
 docker pull ghcr.io/$GITHUB_ACCESS_TOKEN_1_OWNER/chwimeet-backend:latest
 
 # 현재 실행 중인 컨테이너 확인
-if docker ps | grep -q team1-app-001; then
-  CURRENT_CONTAINER="team1-app-001"
-  NEW_CONTAINER="team1-app-002"
+if docker ps | grep -q ${var.prefix}-app-001; then
+  CURRENT_CONTAINER="${var.prefix}-app-001"
+  NEW_CONTAINER="${var.prefix}-app-002"
   CURRENT_PORT=8080
   NEW_PORT=8081
 else
-  CURRENT_CONTAINER="team1-app-002"
-  NEW_CONTAINER="team1-app-001"
+  CURRENT_CONTAINER="${var.prefix}-app-002"
+  NEW_CONTAINER="${var.prefix}-app-001"
   CURRENT_PORT=8081
   NEW_PORT=8080
 fi
@@ -464,7 +438,7 @@ echo "New: $NEW_CONTAINER (port $NEW_PORT)"
 
 # 새 컨테이너 시작
 echo "Starting new container: $NEW_CONTAINER..."
-if [ "$NEW_CONTAINER" = "team1-app-002" ]; then
+if [ "$NEW_CONTAINER" = "${var.prefix}-app-002" ]; then
   docker-compose --profile blue-green up -d $NEW_CONTAINER
 else
   docker-compose up -d $NEW_CONTAINER
@@ -523,7 +497,7 @@ chmod +x /home/ec2-user/app/deploy.sh
 
 # 초기 배포
 cd /home/ec2-user/app
-docker-compose up -d team1-app-001
+docker-compose up -d ${var.prefix}-app-001
 
 # 헬스체크 대기
 echo "Waiting for application to start..."
@@ -551,8 +525,8 @@ echo "📖 Next Steps:"
 echo "1. Login to Nginx Proxy Manager (http://$PUBLIC_IP:81)"
 echo "2. Add Proxy Host:"
 echo "   - Domain: ${var.app_1_domain}"
-// 컨테이너 이름 team1-app-001
-echo "   - Forward Hostname/IP: team1-app-001"
+// 컨테이너 이름 ${var.prefix}-app-001
+echo "   - Forward Hostname/IP: ${var.prefix}-app-001"
 echo "   - Forward Port: 8080"
 echo "3. Add SSL Certificate (Let's Encrypt)"
 echo "4. Test: https://${var.app_1_domain}"
@@ -592,7 +566,7 @@ resource "aws_eip" "eip-team1" {
   domain = "vpc"
 
   tags = {
-    Name = "${var.prefix}-eip" // team1-eip
+    Name = "${var.prefix}-eip" // ${var.prefix}-eip
     Team = var.team_tag_value
   }
 }
@@ -601,14 +575,14 @@ resource "aws_eip" "eip-team1" {
 resource "aws_instance" "ec2-team1" {
   ami                         = data.aws_ami.latest-amazon-linux.id
   instance_type               = "t3.small"
-  key_name                    = "team1-key"
+  key_name                    = var.key_name
   subnet_id                   = aws_subnet.subnet-team1-a.id
   vpc_security_group_ids      = [aws_security_group.sg-team1.id]
   associate_public_ip_address = true
   iam_instance_profile        = aws_iam_instance_profile.instance-profile-team1.name
 
   tags = {
-    Name = "${var.prefix}-backend" // team1-backend (배포 대상 EC2 태그)
+    Name = "${var.prefix}-backend" // ${var.prefix}-backend (배포 대상 EC2 태그)
     Team = var.team_tag_value
   }
 
